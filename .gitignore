@@ -1,0 +1,35 @@
+__pycache__/
+*.pyc
+!recovery/*.pyc
+.Python
+venv/
+.venv/
+
+memory/
+output/
+research/
+
+# Local swarm run state / scratch (do not commit)
+.swarm/
+.swarm-output/
+
+.DS_Store
+*.log
+
+.env
+.env.*
+!.env.example
+.env.npm
+
+.npmrc
+
+node_modules/
+
+# Agent / tool folders
+.antigravitycli/
+.swarm-report.json
+swarm_log.txt
+
+# Next.js / Web ignores
+web/node_modules/
+web/.next/
