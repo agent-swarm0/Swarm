@@ -11,6 +11,7 @@ import { Router } from "express";
 import { runRequestSchema } from "../schemas/run.js";
 import { createRun, getRun } from "../services/runRegistry.js";
 import { listAgents } from "../services/agentCatalog.js";
+import { startRun } from "../services/runService.js";
 import type { ProviderName } from "../types/index.js";
 
 export const runRouter = Router();
@@ -30,7 +31,7 @@ runRouter.post("/api/run", (req, res) => {
     return;
   }
 
-  const { goal, provider, agentSlug, model } = parsed.data;
+  const { goal, provider, apiKey, agentSlug, model } = parsed.data;
 
   // If an agent was named, it must exist in the catalog.
   if (agentSlug && !listAgents().some((a) => a.slug === agentSlug)) {
@@ -52,9 +53,7 @@ runRouter.post("/api/run", (req, res) => {
 
   req.log.info("run accepted", { provider, agentSlug, model });
 
-  // NOTE (Commit 5): kick off dispatch here once the provider adapter + WS
-  // server exist — router.run(...) streaming into the WS room keyed by run id.
-
+  // Respond first (client opens the WS), then start streaming in the background.
   res.status(202).json({
     requestId: run.requestId,
     state: run.state,
@@ -63,6 +62,8 @@ runRouter.post("/api/run", (req, res) => {
       query: { requestId: run.requestId },
     },
   });
+
+  startRun(run, { apiKey, model });
 });
 
 runRouter.get("/api/run/:requestId", (req, res) => {

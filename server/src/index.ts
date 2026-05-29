@@ -10,6 +10,10 @@ import { createApp } from "./app.js";
 import { config } from "./config.js";
 import { logger } from "./utils/logger.js";
 import { attachWebSocketServer } from "./websocket/index.js";
+import { registerBuiltinProviders } from "./providers/register.js";
+
+// Wire concrete provider adapters (openai, …) into the registry.
+registerBuiltinProviders();
 
 const app = createApp();
 const server = createServer(app);

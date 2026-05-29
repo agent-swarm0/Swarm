@@ -41,8 +41,6 @@ export function attachWebSocketServer(server: Server): WebSocketHandle {
     ws.isAlive = true;
     ws.requestId = parseRequestId(req.url);
 
-    if (ws.requestId) join(ws.requestId, ws);
-
     ws.on("pong", () => {
       ws.isAlive = true;
     });
@@ -58,6 +56,8 @@ export function attachWebSocketServer(server: Server): WebSocketHandle {
       });
     });
 
+    // Welcome first, then subscribe — `join` replays buffered run history, so
+    // the client sees: welcome → any missed frames → live frames.
     ws.send(
       JSON.stringify(
         frame({
@@ -67,6 +67,8 @@ export function attachWebSocketServer(server: Server): WebSocketHandle {
         }),
       ),
     );
+
+    if (ws.requestId) join(ws.requestId, ws);
 
     logger.info("ws client connected", { requestId: ws.requestId });
   });

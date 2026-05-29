@@ -104,6 +104,21 @@ export function listAgents(): Agent[] {
   return cache;
 }
 
+/**
+ * Reads the markdown system prompt for an agent, or undefined if the agent is
+ * unknown or its file is missing. Agent files live under `<repo>/agents/`.
+ */
+export function getAgentSystemPrompt(slug: string): string | undefined {
+  const agent = listAgents().find((a) => a.slug === slug);
+  if (!agent || !agent.file) return undefined;
+  const agentsDir = resolve(dirname(resolveConfigPath()), "agents");
+  try {
+    return readFileSync(resolve(agentsDir, agent.file), "utf8");
+  } catch {
+    return undefined;
+  }
+}
+
 /** Returns agents in a single category (case-insensitive). */
 export function listAgentsByCategory(category: string): Agent[] {
   const want = category.trim().toLowerCase();
