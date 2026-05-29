@@ -33,3 +33,7 @@ swarm_log.txt
 # Next.js / Web ignores
 web/node_modules/
 web/.next/
+
+#node modules ignore
+
+node_modules/
