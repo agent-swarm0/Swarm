@@ -65,9 +65,20 @@ export type WsServerFrame =
   | WsDoneFrame
   | WsErrorFrame;
 
-/** Helper to construct a frame with the version stamped in. */
-export function frame<T extends Omit<WsServerFrame, "v">>(
-  payload: T,
-): T & { v: WsProtocolVersion } {
-  return { v: WS_PROTOCOL_VERSION, ...payload };
+/**
+ * Distributive Omit — applies Omit to each union member individually, so
+ * member-specific fields are preserved (plain `Omit<Union, K>` collapses to the
+ * union's common keys only).
+ */
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
+  ? Omit<T, K>
+  : never;
+
+/**
+ * Stamp the protocol version onto a frame payload. The `type` discriminant
+ * narrows to the right member, so fields like `serverTime`/`content` are
+ * accepted while the discriminated union stays enforced.
+ */
+export function frame(payload: DistributiveOmit<WsServerFrame, "v">): WsServerFrame {
+  return { v: WS_PROTOCOL_VERSION, ...payload } as WsServerFrame;
 }
