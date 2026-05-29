@@ -89,6 +89,7 @@
     "open": "^11.0.0",
     "ora": "^7.0.1",
     "p-map": "^7.0.4",
+    "p-limit": "^5.0.0",
     "prompts": "^2.4.2",
     "react": "^19.2.5",
     "react-compiler-runtime": "^0.0.0-experimental-7b7074b-20240906",
