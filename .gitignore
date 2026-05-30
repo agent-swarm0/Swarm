@@ -36,4 +36,10 @@ web/.next/
 
 #node modules ignore
 
-node_modules/
+node_modules/node_modules/
+dist/
+.env
+__pycache__/
+*.pyc
+output/
+memory/
