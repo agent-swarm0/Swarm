@@ -11,7 +11,7 @@ import { Router } from "express";
 import { runRequestSchema } from "../schemas/run.js";
 import { createRun, getRun } from "../services/runRegistry.js";
 import { listAgents } from "../services/agentCatalog.js";
-import { startRun } from "../services/runService.js";
+import { enqueueRun } from "../services/runQueue.js";
 import type { ProviderName } from "../types/index.js";
 
 export const runRouter = Router();
@@ -63,7 +63,7 @@ runRouter.post("/api/run", (req, res) => {
     },
   });
 
-  startRun(run, { apiKey, model });
+  enqueueRun(run, { apiKey, model });
 });
 
 runRouter.get("/api/run/:requestId", (req, res) => {

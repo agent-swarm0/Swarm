@@ -16,4 +16,4 @@ export const PROVIDER_NAMES: readonly ProviderName[] = [
 export type RunMode = "api" | "cli";
 
 /** Lifecycle states a single run can be in. */
-export type RunState = "pending" | "running" | "done" | "error";
+export type RunState = "pending" | "queued" | "running" | "done" | "error";

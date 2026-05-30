@@ -11,7 +11,6 @@
  * record or logged.
  */
 import type { ProviderAdapter } from "../providers/types.js";
-import { getProvider } from "../providers/index.js";
 import { getAgentSystemPrompt } from "./agentCatalog.js";
 import { updateRunState, type RunRecord } from "./runRegistry.js";
 import { publish, closeRoom } from "../websocket/hub.js";
@@ -91,31 +90,4 @@ export async function executeRun(
 
   updateRunState(run.requestId, errored ? "error" : "done");
   setTimeout(() => closeRoom(run.requestId), ROOM_RETENTION_MS).unref();
-}
-
-/**
- * Resolve the provider and start the run in the background. If the provider is
- * not registered, an error frame is emitted and the run is marked failed.
- */
-export function startRun(run: RunRecord, opts: StartRunOptions): void {
-  const adapter: ProviderAdapter | undefined = getProvider(run.provider);
-  if (!adapter) {
-    publish(
-      run.requestId,
-      frame({
-        type: "error",
-        requestId: run.requestId,
-        message: `Provider "${run.provider}" is not available.`,
-      }),
-    );
-    updateRunState(run.requestId, "error");
-    return;
-  }
-
-  void executeRun(run, adapter, opts).catch((err) => {
-    logger.error("unhandled run failure", {
-      requestId: run.requestId,
-      err: err instanceof Error ? err.message : String(err),
-    });
-  });
 }

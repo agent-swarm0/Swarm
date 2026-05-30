@@ -1,7 +1,7 @@
 /**
  * End-to-end dispatch test using stub provider adapters (no network).
  *
- * Verifies that startRun drives an adapter, publishes token/done/error frames
+ * Verifies that enqueueRun drives an adapter, publishes token/done/error frames
  * into the run's WS room, and transitions run state correctly — exercising the
  * full POST-less pipeline: registry → runService → hub → WS client.
  */
@@ -18,7 +18,7 @@ import {
 import { registerProvider } from "../src/providers/index.js";
 import type { ProviderAdapter } from "../src/providers/types.js";
 import { createRun, getRun } from "../src/services/runRegistry.js";
-import { startRun } from "../src/services/runService.js";
+import { enqueueRun } from "../src/services/runQueue.js";
 
 const okAdapter: ProviderAdapter = {
   name: "openai",
@@ -109,7 +109,7 @@ test("successful run streams tokens then done, and ends in state 'done'", async 
   const { ws, next } = await connect(`${wsBase}?requestId=req_ok`);
   await next(); // welcome
 
-  startRun(run, { apiKey: "stub-key" });
+  enqueueRun(run, { apiKey: "stub-key" });
 
   const f1 = await next<{ type: string; content?: string }>();
   const f2 = await next<{ type: string; content?: string }>();
@@ -131,7 +131,7 @@ test("buffered frames replay to a client that connects late", async () => {
     provider: "openai",
   });
   // Start BEFORE connecting — frames must be buffered and replayed on join.
-  startRun(run, { apiKey: "stub-key" });
+  enqueueRun(run, { apiKey: "stub-key" });
   await waitForState("req_late", "done");
 
   const { ws, next } = await connect(`${wsBase}?requestId=req_late`);
@@ -151,7 +151,7 @@ test("provider error yields an error frame and state 'error'", async () => {
   const { ws, next } = await connect(`${wsBase}?requestId=req_err`);
   await next(); // welcome
 
-  startRun(run, { apiKey: "stub-key" });
+  enqueueRun(run, { apiKey: "stub-key" });
 
   const f = await next<{ type: string; message?: string }>();
   assert.equal(f.type, "error");
@@ -169,7 +169,7 @@ test("unregistered provider fails fast with an error frame", async () => {
   const { ws, next } = await connect(`${wsBase}?requestId=req_noprov`);
   await next(); // welcome
 
-  startRun(run, { apiKey: "stub-key" });
+  enqueueRun(run, { apiKey: "stub-key" });
 
   const f = await next<{ type: string; message?: string }>();
   assert.equal(f.type, "error");

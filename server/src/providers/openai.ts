@@ -9,6 +9,8 @@
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import type { ProviderAdapter, ProviderStreamEvent } from "./types.js";
+import { withRetry } from "../utils/retry.js";
+import { logger } from "../utils/logger.js";
 
 export const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
 
@@ -89,13 +91,30 @@ export const openaiAdapter: ProviderAdapter = {
     messages.push({ role: "user", content: input.goal });
 
     try {
-      const stream = await client.chat.completions.create(
+      // Retry only stream *establishment* (transient 429/5xx/timeout). Once
+      // tokens flow we never retry — that would duplicate emitted content.
+      const stream = await withRetry(
+        () =>
+          client.chat.completions.create(
+            {
+              model: input.model ?? DEFAULT_OPENAI_MODEL,
+              messages,
+              stream: true,
+            },
+            input.signal ? { signal: input.signal } : undefined,
+          ),
         {
-          model: input.model ?? DEFAULT_OPENAI_MODEL,
-          messages,
-          stream: true,
+          retries: 3,
+          baseDelayMs: 300,
+          isRetryable: (e) => mapOpenAiError(e).retryable,
+          signal: input.signal,
+          onRetry: (attempt, delayMs) =>
+            logger.warn("openai retry", {
+              requestId: input.requestId,
+              attempt,
+              delayMs,
+            }),
         },
-        input.signal ? { signal: input.signal } : undefined,
       );
 
       let finishReason: string | undefined;

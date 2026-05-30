@@ -68,7 +68,8 @@ server/
 | **Environment variables only** for configuration. | `config.ts` |
 | **Every request/run is traceable by `requestId`.** Inbound `x-request-id` is honoured or a new id minted; echoed in the response header and bound to a child logger. | `middleware/requestId.ts`, `utils/ids.ts` |
 | **`ProviderAdapter` defined from day one.** Uniform `run()` contract yielding normalised stream events. | `providers/types.ts` |
-| **WebSocket messages are versioned.** Every frame carries `v` and `type`; raw strings are never sent. Current version: `1`. | `websocket/protocol.ts` |
+| **WebSocket messages are versioned.** Every frame carries `v` and `type`; raw strings are never sent. Current version: `1` (frame types: welcome/token/agent_status/queue_status/done/error). | `websocket/protocol.ts` |
+| **Concurrency is capped + queued.** At most `api_mode.concurrency_cap` runs execute at once (override: `SWARM_CONCURRENCY_CAP`); excess runs queue FIFO and receive `queue_status` frames. | `services/runQueue.ts`, `services/swarmConfig.ts` |
 | **No stack traces to clients.** Errors are logged server-side; clients get a human-readable message. | `middleware/errorHandler.ts` |
 | **Structured logging only.** No bare `console.log` in app paths. | `utils/logger.ts` |
 | **App/server split.** `app.ts` builds the app; `index.ts` binds the port — so tests run portless or on an ephemeral port. | `app.ts`, `index.ts`, `test/smoke.test.ts` |
@@ -87,11 +88,14 @@ client ──HTTP──► [cors] ─► [json] ─► [requestId] ─► route 
 ```text
 POST /api/run {goal, provider, apiKey, agentSlug?}
    └─ zod validate ─► runRegistry.createRun(requestId) ─► 202 {requestId, stream}
-       └─ startRun (fire-and-forget)
-           └─ getProvider(name) + getAgentSystemPrompt(agentSlug)
-               └─ adapter.run() yields {token|done|error}
-                   └─ hub.publish(requestId, frame) ─► buffered + fanned out to
-                      clients on ws://…/ws/stream?requestId=…  (late joiners get replay)
+       └─ enqueueRun (fire-and-forget)
+           └─ getProvider(name) ─ missing? → error frame, done
+           └─ slot free? run now : queue (state "queued", emit queue_status)
+               └─ executeRun: getAgentSystemPrompt(agentSlug) + adapter.run()
+                   └─ yields {token|done|error}
+                       └─ hub.publish(requestId, frame) ─► buffered + fanned out to
+                          clients on ws://…/ws/stream?requestId=…  (late joiners get replay)
+           └─ on finish: free slot ─► pump() promotes next queued run
 ```
 
 The API key is passed to the adapter per-request and is never stored on the run
