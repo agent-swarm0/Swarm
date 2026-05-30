@@ -9,13 +9,17 @@ import { createServer } from "node:http";
 import { createApp } from "./app.js";
 import { config } from "./config.js";
 import { logger } from "./utils/logger.js";
+import { attachWebSocketServer } from "./websocket/index.js";
+import { registerBuiltinProviders } from "./providers/register.js";
+
+// Wire concrete provider adapters (openai, …) into the registry.
+registerBuiltinProviders();
 
 const app = createApp();
 const server = createServer(app);
 
-// NOTE (later commit): attach the WebSocket server to `server` here, e.g.
-//   import { attachWebSocketServer } from "./websocket/index.js";
-//   attachWebSocketServer(server);
+// WebSocket server shares the HTTP port; serves /ws/stream.
+const ws = attachWebSocketServer(server);
 
 server.listen(config.port, config.host, () => {
   logger.info("server listening", {
@@ -38,14 +42,16 @@ function shutdown(signal: string): void {
   shuttingDown = true;
   logger.info("shutting down", { signal });
 
-  // Stop accepting new connections, then exit once existing ones drain.
-  server.close((err) => {
-    if (err) {
-      logger.error("error during shutdown", { err: err.message });
-      process.exit(1);
-    }
-    logger.info("shutdown complete");
-    process.exit(0);
+  // Close WS clients first, then stop accepting HTTP connections and drain.
+  void ws.close().then(() => {
+    server.close((err) => {
+      if (err) {
+        logger.error("error during shutdown", { err: err.message });
+        process.exit(1);
+      }
+      logger.info("shutdown complete");
+      process.exit(0);
+    });
   });
 
   // Hard cap so a hung connection can't block forever.

@@ -9,6 +9,7 @@ import { Router } from "express";
 import { listProviders } from "../providers/index.js";
 import { activeRunCount, totalRunCount } from "../services/runRegistry.js";
 import { WS_PROTOCOL_VERSION } from "../websocket/protocol.js";
+import { activeRoomCount, totalClientCount } from "../websocket/hub.js";
 import { PROVIDER_NAMES, type RunMode } from "../types/index.js";
 
 export const statusRouter = Router();
@@ -29,6 +30,9 @@ statusRouter.get("/api/status", (_req, res) => {
     },
     ws: {
       protocolVersion: WS_PROTOCOL_VERSION,
+      path: "/ws/stream",
+      rooms: activeRoomCount(),
+      clients: totalClientCount(),
     },
     uptimeSeconds: Math.round(process.uptime()),
   });

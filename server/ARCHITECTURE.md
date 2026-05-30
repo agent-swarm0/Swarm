@@ -82,26 +82,38 @@ client ──HTTP──► [cors] ─► [json] ─► [requestId] ─► route 
                               (404 + error handler terminate the chain)
 ```
 
-## 6. Target request lifecycle (later commits — not yet built)
+## 6. Run lifecycle (live)
 
 ```text
 POST /api/run {goal, provider, apiKey, agentSlug?}
-   └─ zod validate ─► runRegistry.createRun(requestId)
-       └─ router resolves ProviderAdapter by name
-           └─ adapter.run() yields {token|done|error}
-               └─ websocket/stream pipes versioned frames to the
-                  client connected on ws://…/ws/stream?requestId=…
+   └─ zod validate ─► runRegistry.createRun(requestId) ─► 202 {requestId, stream}
+       └─ startRun (fire-and-forget)
+           └─ getProvider(name) + getAgentSystemPrompt(agentSlug)
+               └─ adapter.run() yields {token|done|error}
+                   └─ hub.publish(requestId, frame) ─► buffered + fanned out to
+                      clients on ws://…/ws/stream?requestId=…  (late joiners get replay)
 ```
+
+The API key is passed to the adapter per-request and is never stored on the run
+record or logged.
 
 ## 7. Endpoints
 
 | Method | Path | Status | Purpose |
 | --- | --- | --- | --- |
 | GET | `/health` | ✅ live | Liveness probe for deploy platforms. |
-| GET | `/api/status` | ✅ live | Mode, providers (supported/registered), run counts, WS protocol version, uptime. |
-| GET | `/api/agents` | ⏳ Commit 2 | Agent catalog from `swarm.config.json` (doc-files filtered). |
-| POST | `/api/run` | ⏳ later | Start an API-mode run; returns `requestId`. |
-| WS | `/ws/stream` | ⏳ later | Streams versioned frames for a `requestId`. |
+| GET | `/api/status` | ✅ live | Mode, providers (supported/registered), run counts, WS rooms/clients, WS protocol version, uptime. |
+| GET | `/api/agents` | ✅ live | Agent catalog from `swarm.config.json` (doc-files filtered); `?category=` filter. |
+| POST | `/api/run` | ✅ live | Validate (zod) → register run → 202 `{requestId, stream}`; dispatch streams over WS. |
+| GET | `/api/run/:requestId` | ✅ live | Poll a run's state. |
+| WS | `/ws/stream?requestId=` | ✅ live | Versioned frames for a run (welcome → token… → done/error); buffered replay for late joiners. |
+
+### Provider adapters
+
+| Provider | Status |
+| --- | --- |
+| OpenAI | ✅ streaming + error mapping |
+| Anthropic / Gemini / Groq | ⏳ interface ready; adapters land next (other owners) |
 
 ## 8. Local development
 
