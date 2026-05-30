@@ -11,6 +11,7 @@ import { requestIdMiddleware } from "./middleware/requestId.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { apiRateLimiter } from "./middleware/rateLimit.js";
 import { apiRouter } from "./routes/index.js";
+import { getOutputRoot, getLatestSessionId } from "./services/swarmOrchestrator.js";
 
 export function createApp(): Express {
   const app = express();
@@ -33,6 +34,19 @@ export function createApp(): Express {
   app.use("/api", apiRateLimiter);
 
   app.use(apiRouter);
+
+  // Live preview of generated builds. `/preview/<sessionId>/index.html` serves
+  // a specific build; `/latest` redirects to the most recent one so the founder
+  // always has a one-click URL to see what the swarm just shipped.
+  app.use("/preview", express.static(getOutputRoot()));
+  app.get("/latest", (_req, res) => {
+    const id = getLatestSessionId();
+    if (!id) {
+      res.status(404).send("No build yet — dispatch a goal first.");
+      return;
+    }
+    res.redirect(`/preview/${id}/index.html`);
+  });
 
   // 404 then terminal error handler — order matters.
   app.use(notFoundHandler);

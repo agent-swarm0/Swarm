@@ -4,7 +4,6 @@
  */
 import { Router } from "express";
 import { listAgents, getAgentSystemPrompt } from "../services/agentCatalog.js";
-import { logger } from "../utils/logger.js";
  
 const router = Router();
  

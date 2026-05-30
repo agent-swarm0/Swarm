@@ -1,0 +1,29 @@
+node_modules/
+web/node_modules/
+
+# Local run state and generated output
+.swarm/
+.swarm-output/
+web/.swarm/
+memory/
+output/
+research/
+logs/
+project-output/
+project-history/
+
+# Secrets and machine-local config
+.env
+.env.*
+!.env.example
+.env.npm
+.npmrc
+
+# Development-only dashboard snapshots
+web/app-godmode-disabled/
+
+# Python/cache noise
+__pycache__/
+*.pyc
+*.log
+.DS_Store

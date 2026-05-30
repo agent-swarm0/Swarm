@@ -1,0 +1,13 @@
+{
+  "sessionId": "session-1780145025191",
+  "title": "build me an oil and gas saas company thats help...",
+  "prompt": "build me an oil and gas saas company thats helps petroleum companies create a budget \n\nAdditional Clarifications from User:\n- Q: Which type of petroleum companies are the primary users of your SaaS solution?\n  A: Mid-size E&P Firms\n- Q: What is the primary budgeting methodology or focus your SaaS will empower?\n  A: Scenario Planning & Forecasting\n- Q: What visual aesthetic best represents your SaaS brand identity?\n  A: Modern & Streamlined, we want a fullstack application. not one page. with  good UI\n- Q: What is the most critical differentiator or 'killer feature' you envision for this budgeting SaaS?\n  A: I am the founder\n",
+  "createdAt": "2026-05-30T12:44:51.917Z",
+  "files": [
+    "docs/ADR-001-modular-monolith.md",
+    "docs/ADR-002-frontend-stack.md",
+    "DESIGN.md",
+    "design-tokens.json",
+    "design-preview.html"
+  ]
+}

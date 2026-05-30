@@ -1,1 +1,67 @@
 @import "tailwindcss";
+
+@theme {
+  --color-bg: #e8f1e9;
+  --color-surface: #f1f8f1;
+  --color-bg3: #ddecdf;
+  --color-line: #cee0d0;
+  --color-line2: #b9d2bc;
+  --color-ink: #0f1611;
+  --color-ink2: #4a594d;
+  --color-dim: #7a8a7d;
+  --color-amber: #c2820a;
+  --color-green: #0e8f4d;
+  --color-greenb: #12a85a;
+  --color-greenv: #18bb66;
+  --color-mint: #8ee29f;
+  --color-swarm: #8ee29f;
+  --color-tbg: #060f09;
+  --color-red: #c2410c;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-instrument);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* ---- keyframes ---- */
+@keyframes drift1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(7%,5%) scale(1.14)} }
+@keyframes drift2 { 0%,100%{transform:translate(0,0) scale(1.05)} 50%{transform:translate(-6%,4%) scale(.92)} }
+@keyframes drift3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(5%,-6%) scale(1.12)} }
+@keyframes swarmpulse { 0%{box-shadow:0 0 0 0 rgba(24,187,102,.5)} 70%{box-shadow:0 0 0 8px rgba(24,187,102,0)} 100%{box-shadow:0 0 0 0 rgba(24,187,102,0)} }
+@keyframes swarm-flow { to { stroke-dashoffset: -16; } }
+
+/* ---- aurora ---- */
+.aurora { position:absolute; inset:-25%; z-index:0; filter:blur(72px); opacity:.7; pointer-events:none; }
+.blob { position:absolute; border-radius:9999px; }
+.b1 { width:46vw; height:46vw; left:-6%; top:-12%; background:radial-gradient(circle,rgba(24,187,102,.5),transparent 62%); animation:drift1 20s cubic-bezier(.22,.85,.16,1) infinite; }
+.b2 { width:40vw; height:40vw; right:-8%; top:0; background:radial-gradient(circle,rgba(16,160,88,.42),transparent 62%); animation:drift2 26s cubic-bezier(.22,.85,.16,1) infinite; }
+.b3 { width:38vw; height:38vw; left:30%; bottom:-22%; background:radial-gradient(circle,rgba(116,227,137,.38),transparent 60%); animation:drift3 30s cubic-bezier(.22,.85,.16,1) infinite; }
+
+/* ---- scroll reveal ---- */
+.reveal { opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.22,.85,.16,1), transform .8s cubic-bezier(.22,.85,.16,1); }
+.reveal.in { opacity:1; transform:none; }
+
+/* ---- agent field dots ---- */
+.adot { aspect-ratio:1; border:1px solid var(--color-line2); border-radius:5px; background:var(--color-surface); transition:background .55s, box-shadow .55s, border-color .55s; }
+.adot.on { background:var(--color-greenv); border-color:var(--color-greenv); box-shadow:0 0 14px -2px var(--color-greenv); }
+.adot.warm { background:var(--color-bg3); }
+
+/* ---- misc ---- */
+.pulse-dot { animation:swarmpulse 1.6s infinite; }
+.swarm-edge-active { animation: swarm-flow 0.6s linear infinite; }
+.swarm-mark { font-family:var(--font-mono); font-weight:500; letter-spacing:.34em; color:var(--color-green); }
+
+/* masked key input: avoids type=password so browsers never offer to save it */
+.key-mask { -webkit-text-security: disc; text-security: disc; }
+
+@media (prefers-reduced-motion: reduce) {
+  *{ animation:none !important; transition:none !important; }
+}

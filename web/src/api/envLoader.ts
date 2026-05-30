@@ -4,6 +4,7 @@ import { join } from 'path';
 export interface EnvKeys {
   GEMINI_API_KEY?: string;
   ANTHROPIC_API_KEY?: string;
+  DEEPSEEK_API_KEY?: string;
 }
 
 export function loadEnvKeys(): EnvKeys {
@@ -15,6 +16,9 @@ export function loadEnvKeys(): EnvKeys {
   }
   if (process.env.ANTHROPIC_API_KEY) {
     keys.ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+  }
+  if (process.env.DEEPSEEK_API_KEY) {
+    keys.DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
   }
 
   // Fallback to manual parsing of the parent .env file
@@ -43,6 +47,8 @@ export function loadEnvKeys(): EnvKeys {
             keys.GEMINI_API_KEY = val;
           } else if (key === 'ANTHROPIC_API_KEY') {
             keys.ANTHROPIC_API_KEY = val;
+          } else if (key === 'DEEPSEEK_API_KEY') {
+            keys.DEEPSEEK_API_KEY = val;
           }
         }
       }
@@ -57,6 +63,9 @@ export function loadEnvKeys(): EnvKeys {
   }
   if (keys.GEMINI_API_KEY === 'your-gemini-key') {
     keys.GEMINI_API_KEY = undefined;
+  }
+  if (keys.DEEPSEEK_API_KEY === 'your-deepseek-key') {
+    keys.DEEPSEEK_API_KEY = undefined;
   }
 
   return keys;

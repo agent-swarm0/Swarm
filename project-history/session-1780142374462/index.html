@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Library: Discover & Advance Research</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    /* Basic component styles for the preview, would live in components.css */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-md);
+      font-size: var(--text-base);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: var(--bg-primary);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-light);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--primary-color);
+      color: var(--bg-primary);
+    }
+
+    .search-bar {
+      width: 100%;
+      max-width: 400px;
+      padding: var(--space-3) var(--space-4);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: var(--text-base);
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .search-bar:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px var(--primary-color-alpha); /* Placeholder for alpha */
+    }
+
+    /* Card Component */
+    .card {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      padding: var(--space-6);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      border: 1px solid var(--border-color);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-lg); /* Assuming a shadow-lg variable */
+      transform: translateY(-2px);
+    }
+
+    .card h3 {
+      font-size: var(--text-xl);
+      margin: 0;
+      color: var(--primary-color);
+    }
+
+    .card p {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      margin: 0;
+    }
+    
+    .card .read-link {
+      margin-top: auto; /* Push to bottom */
+      align-self: flex-start;
+      font-size: var(--text-sm);
+      font-weight: 500;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: var(--space-10);
+      font-size: var(--text-4xl);
+      color: var(--text-primary);
+    }
+
+    /* Hero section specific styles */
+    .hero-section {
+      text-align: center;
+      padding: var(--space-20) 0;
+      background-color: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: var(--space-12);
+    }
+
+    .hero-section h1 {
+      font-size: var(--text-5xl);
+      margin-bottom: var(--space-4);
+      font-family: var(--font-family-headings);
+    }
+
+    .hero-section p {
+      font-size: var(--text-lg);
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto var(--space-8);
+    }
+
+    .hero-search-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-4);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .hero-search-wrapper .search-bar {
+      max-width: none;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container flex justify-between items-center">
+      <div class="logo">
+        <h1 style="font-size: var(--text-2xl); margin: 0; font-family: var(--font-family-headings); color: var(--primary-color);">
+          <a href="#" style="color: inherit; text-decoration: none;">E-Library</a>
+        </h1>
+      </div>
+      <nav class="primary-nav flex items-center gap-8">
+        <input type="search" class="search-bar" placeholder="Search academic papers..." style="flex-grow: 1;">
+        <ul class="flex items-center gap-8" style="list-style: none; margin: 0; padding: 0;">
+          <li><a href="#" class="text-secondary" style="font-weight: 500;">Browse</a></li>
+          <li><a href="#" class="text-secondary" style="font-weight: 500;">My Library</a></li>
+        </ul>
+        <!-- Theme Toggle Component -->
+        <div class="theme-toggle" role="radiogroup" aria-label="Theme selection">
+          <button class="theme-toggle-option" data-theme="light" role="radio" aria-checked="false">
+            <span aria-hidden="true">☀️</span> Light
+          </button>
+          <button class="theme-toggle-option" data-theme="dark" role="radio" aria-checked="false">
+            <span aria-hidden="true">🌙</span> Dark
+          </button>
+          <button class="theme-toggle-option" data-theme="system" role="radio" aria-checked="true">
+            <span aria-hidden="true">💻</span> System
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <section class="hero-section">
+      <div class="container">
+        <h1>Discover Knowledge. Advance Research.</h1>
+        <p>Your gateway to a world of academic papers, research, and scholarly publications across diverse disciplines.</p>
+        <div class="hero-search-wrapper">
+          <input type="search" class="search-bar" placeholder="Search for papers, authors, topics...">
+          <button class="btn btn-primary">Search</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="container" style="margin-bottom: var(--space-12);">
+      <h2 class="section-title">Explore Disciplines</h2>
+      <div class="grid grid-cols-sm-2 md:grid-cols-3 lg:grid-cols-4 gap-grid-lg">
+        <div class="card">
+          <h3>Artificial Intelligence</h3>
+          <p>Cutting-edge research in ML, NLP, and Robotics.</p>
+          <a href="#" class="read-link">View Discipline &rarr;</a>
+        </div>
+        <div class="card">
+          <h3>Quantum Physics</h3>
+          <p>Explore the fundamental nature of matter and energy.</p>
+          <a href="#" class="read-link">View Discipline &rarr;</a>
+        </div>
+        <div class="card">
+          <h3>Neuroscience</h3>
+          <p>Studies on the brain, cognition, and behavior.</p>
+          <a href="#" class="read-link">View Discipline &rarr;</a>
+        </div>
+        <div class="card">
+          <h3>Environmental Science</h3>
+          <p>Research on ecosystems, climate, and sustainability.</p>
+          <a href="#" class="read-link">View Discipline &rarr;</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="container">
+      <h2 class="section-title">Trending Research Papers</h2>
+      <div class="grid grid-cols-sm-1 md:grid-cols-2 lg:grid-cols-3 gap-grid-lg">
+        <div class="card">
+          <h3>The Ethics of AI in Healthcare</h3>
+          <p><strong>Authors:</strong> Dr. A. Smith, Prof. J. Doe</p>
+          <p><strong>Year:</strong> 2023 | <strong>Journal:</strong> J. AI Ethics</p>
+          <p>A deep dive into the moral considerations of AI implementation in clinical settings and patient care.</p>
+          <a href="#" class="read-link btn btn-secondary">Read Now</a>
+        </div>
+        <div class="card">
+          <h3>Advancements in Quantum Computing Algorithms</h3>
+          <p><strong>Authors:</strong> Dr. S. Patel, Dr. L. Chen</p>
+          <p><strong>Year:</strong> 2022 | <strong>Journal:</strong> Q. Comp. Rev.</p>
+          <p>Examining recent breakthroughs in algorithms for fault-tolerant quantum computers and their potential.</p>
+          <a href="#" class="read-link btn btn-secondary">Read Now</a>
+        </div>
+        <div class="card">
+          <h3>Mapping Neural Pathways for Memory Formation</h3>
+          <p><strong>Authors:</strong> Prof. M. Johnson</p>
+          <p><strong>Year:</strong> 2023 | <strong>Journal:</strong> Neuro Sci. Int.</p>
+          <p>Using fMRI and genetic markers to identify key brain regions involved in long-term memory consolidation.</p>
+          <a href="#" class="read-link btn btn-secondary">Read Now</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container text-center">
+      <p>&copy; 2023 E-Library. All rights reserved.</p>
+      <ul class="flex justify-center gap-8" style="list-style: none; margin-top: var(--space-4); padding: 0;">
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Contact Us</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="js/theme-manager.js"></script>
+</body>
+</html>

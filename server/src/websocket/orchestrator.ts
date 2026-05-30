@@ -6,10 +6,18 @@
 import type { WebSocket } from "ws";
 import type { OrchestratorCommand, OrchestratorEvent } from "../types/orchestrator.js";
 import { orchestratorState } from "../services/orchestratorState.js";
+import { runSession, stopSession } from "../services/swarmOrchestrator.js";
 import { logger } from "../utils/logger.js";
 
 export function handleOrchestratorConnection(ws: WebSocket): void {
   logger.info("orchestrator client connected");
+
+  // Keep-alive: the shared heartbeat pings every 30s and terminates any socket
+  // whose `isAlive` is falsy. Mark this connection alive and refresh on pong,
+  // otherwise long runs (>30s) get their socket reaped and the console freezes.
+  const tracked = ws as WebSocket & { isAlive?: boolean };
+  tracked.isAlive = true;
+  ws.on("pong", () => { tracked.isAlive = true; });
 
   // Subscribe to orchestrator events
   const unsubscribe = orchestratorState.onEvent((event: OrchestratorEvent) => {
@@ -46,17 +54,16 @@ function handleCommand(command: OrchestratorCommand): void {
   switch (command.type) {
     case "session.start":
       logger.info("starting orchestrator session", { goal: command.goal });
-      // Trigger via HTTP to orchestrator route (which spawns Python)
-      fetch("http://localhost:3000/api/orchestrator/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goal: command.goal }),
-      }).catch((err) => logger.error("failed to start orchestrator", { err }));
+      // Run the orchestration in-process: plan a crew, dispatch agents over the
+      // Gemini/DeepSeek APIs, and stream events back over this WebSocket.
+      runSession(command.goal).catch((err) =>
+        logger.error("failed to start orchestrator", { err: err?.message }),
+      );
       break;
 
     case "session.stop":
       logger.info("stopping orchestrator session", { sessionId: command.sessionId });
-      // TODO: Signal Python orchestrator to stop
+      stopSession(command.sessionId);
       break;
 
     case "approval.respond":

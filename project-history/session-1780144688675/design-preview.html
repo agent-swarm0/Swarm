@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dangote Energy Logistics - Design System Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Design Tokens as CSS Custom Properties */
+    :root {
+      /* Colors */
+      --color-brand-primary: #0A2463;
+      --color-brand-accent: #DAA520;
+      --color-text-primary: #212121;
+      --color-text-secondary: #616161;
+      --color-background-light: #F5F5F5;
+      --color-background-dark: #1C1C1C;
+      --color-success: #4CAF50;
+      --color-warning: #FFC107;
+      --color-error: #F44336;
+      --color-border: #E0E0E0;
+
+      /* Typography */
+      --font-family-primary: 'Montserrat', sans-serif;
+      --font-family-secondary: 'Inter', sans-serif;
+      --font-size-xs: 0.75rem;
+      --font-size-sm: 0.875rem;
+      --font-size-base: 1rem;
+      --font-size-lg: 1.125rem;
+      --font-size-xl: 1.25rem;
+      --font-size-2xl: 1.5rem;
+      --font-size-3xl: 1.875rem;
+      --font-size-4xl: 2.25rem;
+      --font-size-5xl: 3rem;
+      --font-weight-light: 300;
+      --font-weight-regular: 400;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-2xl: 48px;
+      --spacing-3xl: 64px;
+
+      /* Border Radius */
+      --border-radius-none: 0px;
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --border-radius-full: 9999px;
+
+      /* Shadows */
+      --shadow-sm: 0px 2px 4px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0px 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Base Styles */
+    body {
+      font-family: var(--font-family-secondary);
+      color: var(--color-text-primary);
+      line-height: 1.6;
+      margin: 0;
+      background-color: var(--color-background-light);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--spacing-md);
+      flex-grow: 1;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-family-primary);
+      font-weight: var(--font-weight-bold);
+      margin-top: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+    }
+
+    h1 { font-size: var(--font-size-4xl); color: var(--color-brand-primary); }
+    h2 { font-size: var(--font-size-3xl); color: var(--color-text-primary); }
+    h3 { font-size: var(--font-size-2xl); color: var(--color-text-primary); }
+    h4 { font-size: var(--font-size-xl); color: var(--color-text-primary); }
+
+    p {
+      margin-bottom: var(--spacing-md);
+      font-size: var(--font-size-base);
+    }
+
+    /* Section Styling */
+    .section {
+      background-color: #fff;
+      padding: var(--spacing-xl);
+      margin-bottom: var(--spacing-xl);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-title {
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-2xl);
+      color: var(--color-brand-primary);
+      margin-bottom: var(--spacing-lg);
+      border-bottom: 2px solid var(--color-border);
+      padding-bottom: var(--spacing-sm);
+    }
+
+    /* Color Palette Display */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--spacing-md);
+    }
+    .color-box {
+      border-radius: var(--border-radius-sm);
+      height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: var(--spacing-sm);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: white; /* Default for dark colors */
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    .color-box.light-text {
+      color: var(--color-text-primary);
+      text-shadow: none;
+    }
+    .color-box span {
+        display: block;
+        margin-top: var(--spacing-xs);
+        color: rgba(255,255,255,0.8);
+    }
+    .color-box.light-text span {
+        color: var(--color-text-secondary);
+    }
+
+    /* Typography Samples */
+    .typography-sample h1, .typography-sample h2, .typography-sample h3, .typography-sample h4 {
+        margin-top: var(--spacing-md);
+        margin-bottom: var(--spacing-sm);
+    }
+    .typography-sample p {
+        font-family: var(--font-family-secondary);
+        font-weight: var(--font-weight-regular);
+        font-size: var(--font-size-base);
+    }
+    .typography-sample .small-text {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-sm);
+      font-family: var(--font-family-secondary);
+      font-weight: var(--font-weight-medium);
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      border: 1px solid transparent;
+      font-size: var(--font-size-base);
+    }
+    .btn-primary {
+      background-color: var(--color-brand-primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: #081a4b; /* Slightly darker */
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-accent {
+      background-color: var(--color-brand-accent);
+      color: var(--color-text-primary);
+    }
+    .btn-accent:hover {
+      background-color: #c0911a; /* Slightly darker */
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-secondary {
+        background-color: transparent;
+        color: var(--color-brand-primary);
+        border-color: var(--color-brand-primary);
+    }
+    .btn-secondary:hover {
+        background-color: var(--color-brand-primary);
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+    .btn-disabled {
+      background-color: var(--color-border);
+      color: var(--color-text-secondary);
+      cursor: not-allowed;
+    }
+
+    /* Cards */
+    .card {
+      background-color: white;
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-md);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+      border: 1px solid var(--color-border);
+    }
+    .card-header {
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-brand-primary);
+      margin-bottom: var(--spacing-sm);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .card-body {
+      font-size: var(--font-size-base);
+      color: var(--color-text-primary);
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: var(--spacing-md);
+    }
+    label {
+      display: block;
+      margin-bottom: var(--spacing-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-primary);
+      font-size: var(--font-size-sm);
+    }
+    input[type="text"], input[type="email"], input[type="password"], textarea, select {
+      width: 100%;
+      padding: var(--spacing-sm);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      font-family: var(--font-family-secondary);
+      font-size: var(--font-size-base);
+      color: var(--color-text-primary);
+      background-color: #fff;
+      transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--color-brand-primary);
+      box-shadow: 0 0 0 2px rgba(10, 36, 99, 0.2); /* Focus ring */
+    }
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    /* Utility classes for spacing demonstration */
+    .spacing-box {
+      background-color: rgba(10, 36, 99, 0.1);
+      border: 1px dashed var(--color-brand-primary);
+      text-align: center;
+      padding: var(--spacing-sm);
+      margin-bottom: var(--spacing-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-brand-primary);
+    }
+    .spacing-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+    }
+    .spacing-item {
+        background-color: var(--color-background-light);
+        border: 1px solid var(--color-border);
+        padding: var(--spacing-sm);
+        text-align: center;
+        width: calc(33% - var(--spacing-md));
+        box-sizing: border-box;
+    }
+    @media (max-width: 768px) {
+        .spacing-item {
+            width: calc(50% - var(--spacing-md));
+        }
+    }
+    @media (max-width: 480px) {
+        .spacing-item {
+            width: 100%;
+        }
+    }
+
+    footer {
+      background-color: var(--color-brand-primary);
+      color: white;
+      text-align: center;
+      padding: var(--spacing-md);
+      margin-top: var(--spacing-xl);
+      font-size: var(--font-size-sm);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Dangote Energy Logistics</h1>
+    <p><em>"Powering Africa's Growth, Built on Trust."</em></p>
+    <p>This page demonstrates the core visual elements and design tokens for the Dangote Energy Logistics application, embodying a brand image of Heritage, Trust, Robustness, and Scale.</p>
+
+    <div class="section">
+      <h2 class="section-title">Color Palette</h2>
+      <div class="color-grid">
+        <div class="color-box" style="background-color: var(--color-brand-primary);">
+          Brand Primary <span>#0A2463</span>
+        </div>
+        <div class="color-box" style="background-color: var(--color-brand-accent);">
+          Brand Accent <span>#DAA520</span>
+        </div>
+        <div class="color-box" style="background-color: var(--color-text-primary);">
+          Text Primary <span>#212121</span>
+        </div>
+        <div class="color-box light-text" style="background-color: var(--color-background-light); border: 1px solid var(--color-border);">
+          Background Light <span>#F5F5F5</span>
+        </div>
+        <div class="color-box" style="background-color: var(--color-background-dark);">
+          Background Dark <span>#1C1C1C</span>
+        </div>
+        <div class="color-box" style="background-color: var(--color-success);">
+          Success <span>#4CAF50</span>
+        </div>
+        <div class="color-box" style="background-color: var(--color-warning);">
+          Warning <span>#FFC107</span>
+        </div>
+        <div class="color-box" style="background-color: var(--color-error);">
+          Error <span>#F44336</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section typography-sample">
+      <h2 class="section-title">Typography</h2>
+      <h1>Heading 1 (Montserrat Bold)</h1>
+      <h2>Heading 2 (Montserrat Bold)</h2>
+      <h3>Heading 3 (Montserrat Bold)</h3>
+      <h4>Heading 4 (Montserrat Bold)</h4>
+      <p>This is a paragraph of body text using the Inter font family. It is set at the base font size for readability and clarity. We prioritize a clean, functional design to convey robustness and trust in all our communications. <strong>Bold text</strong> for emphasis. <a href="#" style="color: var(--color-brand-primary); text-decoration: none;">Link text</a>.</p>
+      <p class="small-text">This is a smaller supporting text for captions or less critical information. It still uses Inter, but at a reduced size for hierarchy.</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Buttons</h2>
+      <div class="button-group">
+        <button class="btn btn-primary">Primary Action</button>
+        <button class="btn btn-accent">Accent Action</button>
+        <button class="btn btn-secondary">Secondary Action</button>
+        <button class="btn btn-primary" disabled>Disabled Primary</button>
+        <button class="btn btn-disabled" disabled>Disabled</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Cards</h2>
+      <div class="card">
+        <div class="card-header">Logistics Overview</div>
+        <div class="card-body">
+          <p>Real-time insights into our Pan-African operations. Monitor fleet status, delivery progress, and inventory levels across multiple depots. Our commitment to efficiency ensures timely and reliable product distribution.</p>
+          <button class="btn btn-primary">View Details</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Forms</h2>
+      <form>
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="Enter your full name">
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label for="product">Product of Interest</label>
+          <select id="product">
+            <option value="">Select a product</option>
+            <option value="crude">Crude Oil</option>
+            <option value="diesel">Diesel</option>
+            <option value="petrol">Petrol</option>
+            <option value="jetfuel">Jet Fuel</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="message">Your Message</label>
+          <textarea id="message" rows="4" placeholder="How can we assist you?"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Inquiry</button>
+      </form>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Spacing Scale Demonstration (4-point grid)</h2>
+        <p>Visualizing the consistent spacing units for a harmonious layout.</p>
+        <div class="spacing-grid">
+            <div class="spacing-item" style="padding: var(--spacing-xs);">Padding: 4px (xs)</div>
+            <div class="spacing-item" style="padding: var(--spacing-sm);">Padding: 8px (sm)</div>
+            <div class="spacing-item" style="padding: var(--spacing-md);">Padding: 16px (md)</div>
+            <div class="spacing-item" style="padding: var(--spacing-lg);">Padding: 24px (lg)</div>
+            <div class="spacing-item" style="padding: var(--spacing-xl);">Padding: 32px (xl)</div>
+            <div class="spacing-item" style="padding: var(--spacing-2xl);">Padding: 48px (2xl)</div>
+        </div>
+    </div>
+
+  </div>
+
+  <footer>
+    &copy; 2024 Dangote Energy Logistics. All rights reserved.
+  </footer>
+</body>
+</html>
