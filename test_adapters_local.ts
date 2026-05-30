@@ -104,7 +104,7 @@ async function main() {
 
   // 3. Multi-Agent Parallel Dispatch Testing!
   console.log('\n\x1b[35m%s\x1b[0m', '⚡ PHASE 2: Parallel Multi-Agent Orchestration');
-  const swarmGoal = 'Write a comprehensive security audit spec for a peer-to-peer payment gateway';
+  const swarmGoal = 'Plan a multi-stage social media marketing campaign to launch a new developer SDK';
   console.log('\x1b[90m%s\x1b[0m', `Goal: "${swarmGoal}"`);
   
   try {

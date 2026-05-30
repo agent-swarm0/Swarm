@@ -1,0 +1,15 @@
+{
+  "sessionId": "session-1780109606913",
+  "title": "A simple modern real estate lading page Additio...",
+  "prompt": "A simple modern real estate lading page\n\nAdditional Clarifications from User:\n- Q: Could you share any preferred color palettes, typography styles, or competitor landing pages you admire to help us define 'modern' for your brand?\n  A: i just neeed somthing premium\n- Q: What specific call-to-action is most important for this landing page – lead generation through a form, showcasing a single property, or directing users to another site?\n  A: just add a simple button \n- Q: Are there any specific integrations, like an IDX/MLS search bar or a CRM for lead capture, that would be essential for this 'simple' page?\n  A: just use what you yhink is right\n",
+  "createdAt": "2026-05-30T02:54:57.709Z",
+  "files": [
+    "index.html",
+    "index.html",
+    "js/theme-manager.js",
+    "css/design-system.css",
+    "css/layout.css",
+    "css/components.css",
+    "css/utilities.css"
+  ]
+}

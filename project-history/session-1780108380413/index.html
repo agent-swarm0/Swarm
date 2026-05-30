@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StellarVault</title>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/main.css">
+    <!-- Preload fonts for better performance if custom fonts are used -->
+    <!-- <link rel="preload" href="fonts/Roboto-Regular.woff2" as="font" type="font/woff2" crossorigin> -->
+    <meta name="description" content="StellarVault: Your secure and compliant banking-like crypto application on the Stellar network.">
+    <!-- Favicon placeholder -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+</head>
+<body class="theme-system-preference">
+    <div id="app-container" class="layout-container">
+        <header class="layout-header">
+            <h1 class="text-h1">StellarVault</h1>
+            <nav class="global-nav">
+                <!-- Global Navigation Placeholder -->
+                <ul role="menubar">
+                    <li role="none"><a role="menuitem" href="#dashboard">Dashboard</a></li>
+                    <li role="none"><a role="menuitem" href="#wallet">Wallet</a></li>
+                    <li role="none"><a role="menuitem" href="#transactions">Transactions</a></li>
+                    <li role="none"><a role="menuitem" href="#fiat">Fiat On/Off-Ramps</a></li>
+                    <li role="none"><a role="menuitem" href="#staking">Staking</a></li>
+                    <li role="none"><a role="menuitem" href="#trading">Trading</a></li>
+                    <li role="none"><a role="menuitem" href="#settings">Settings</a></li>
+                </ul>
+            </nav>
+            <button id="theme-toggle" aria-label="Toggle theme" class="theme-toggle-button">
+                <span class="visually-hidden icon-light">Light Mode</span>☀️
+                <span class="visually-hidden icon-dark">Dark Mode</span>🌙
+                <span class="visually-hidden icon-system">System Preference Mode</span>🖥️
+            </button>
+        </header>
+
+        <main id="main-content" class="layout-main">
+            <h2 class="text-h2">Welcome to StellarVault</h2>
+            <p>Your secure and compliant platform for managing Stellar assets.</p>
+            <section aria-labelledby="quick-actions-heading">
+                <h3 id="quick-actions-heading" class="text-h3">Quick Actions</h3>
+                <div class="layout-grid grid-cols-2 md:grid-cols-4 gap-spacing-md">
+                    <a href="#wallet" class="button button-primary">View Wallet</a>
+                    <a href="#fiat" class="button button-secondary">Deposit Funds</a>
+                    <a href="#transactions" class="button button-outline">Recent Transactions</a>
+                    <a href="#settings" class="button button-icon"><span class="icon-settings">⚙️</span> Settings</a>
+                </div>
+            </section>
+        </main>
+
+        <footer class="layout-footer">
+            <p>&copy; 2023 StellarVault. All rights reserved.</p>
+            <nav class="footer-nav">
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Service</a>
+            </nav>
+        </footer>
+    </div>
+
+    <!-- Main script to initialize functionality, including theme manager -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

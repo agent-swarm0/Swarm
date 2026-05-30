@@ -1,0 +1,24 @@
+/* css/main.css */
+/* This file can be used to import design-system and layout,
+   or contain global application-specific styles not covered by design system. */
+
+/* @import url('design-system.css'); */
+/* @import url('layout.css'); */
+
+/* Global styles */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Specific component styles not in layout or design system variables */
+/* Example: Custom dashboard widgets or specific form styles */
