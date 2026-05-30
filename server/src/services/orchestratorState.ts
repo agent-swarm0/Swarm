@@ -8,10 +8,6 @@ import { EventEmitter } from "node:events";
 import type {
   OrchestratorSession,
   OrchestratorEvent,
-  AgentState,
-  LogEntry,
-  ApprovalRequest,
-  OrchestratorPhase,
 } from "../types/orchestrator.js";
 
 class OrchestratorStateManager extends EventEmitter {
@@ -41,11 +37,11 @@ class OrchestratorStateManager extends EventEmitter {
    * Updates internal session state and broadcasts the event.
    */
   processEvent(sessionId: string, event: OrchestratorEvent): void {
-    const session = this.sessions.get(sessionId);
+    let session = this.sessions.get(sessionId);
     if (!session) {
       // If it's a session.started event, we create the session
       if (event.type === "session.started") {
-        this.createSession(sessionId, event.goal);
+        session = this.createSession(sessionId, event.goal);
       } else {
         return;
       }
@@ -83,8 +79,7 @@ class OrchestratorStateManager extends EventEmitter {
         }
         break;
       case "agent.phase":
-        const phaseAgent = session.agents.get(event.requestId); // Using requestId as slug for simplicity or map it
-        // In reality, we should map requestId -> agentSlug
+        // requestId -> agentSlug mapping not tracked yet; broadcast only.
         break;
       case "agent.done":
         const doneAgent = session.agents.get(event.agentSlug);

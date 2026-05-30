@@ -31,36 +31,59 @@ API mode allows you to use the swarm without installing a single local agent. Si
 
 ### Prerequisites
 - **Node.js 18+**
-- **Python 3.12+** (For CLI mode orchestration)
+- **Python 3.12+** for the local TUI orchestrator
 
-### Quick Start
+### Install From NPM
 ```bash
-# Clone the repository
+npm install -g swarm
+swarm
+```
+
+### Install From GitHub
+```bash
 git clone https://github.com/agent-swarm0/Swarm.git
 cd Swarm
-
-# Install dependencies
 npm install
-
-# Build the project
 npm run build
-
-# Install globally
+npm run build:web
 npm install -g .
+swarm
 ```
+
+`swarm` starts both local surfaces:
+- The terminal TUI for technical users.
+- The browser dashboard for non-technical users.
+
+The TUI prints the dashboard URL when it starts, usually:
+```text
+Dashboard running: http://127.0.0.1:3001/dashboard
+```
+
+This is fully local. You do not need Vercel or any hosted dashboard deployment.
 
 ---
 
 ## 🛠️ Usage
 
-### Running in CLI Mode
-Launch the interactive TUI or pass a goal directly:
+### Running Swarm
+Launch the interactive TUI and local dashboard:
 ```bash
-# Interactive mode
 swarm
+```
 
-# Direct goal execution
+Pass a goal directly:
+```bash
 swarm "Build a landing page with Tailwind CSS"
+```
+
+Choose a different dashboard port:
+```bash
+swarm --dashboard-port 3010
+```
+
+Skip the dashboard when you only want the terminal:
+```bash
+swarm --no-dashboard
 ```
 
 ### Running in API Mode

@@ -8,7 +8,7 @@ import { saveProjectToHistory } from '@/api/history';
 
 export async function POST(req: NextRequest) {
   try {
-    const { goal, clarifications, sessionId } = await req.json();
+    const { goal, clarifications, sessionId, geminiKey, anthropicKey, deepseekKey } = await req.json();
 
     if (!goal) {
       return new Response(JSON.stringify({ error: 'Goal is required' }), {
@@ -57,19 +57,30 @@ export async function POST(req: NextRequest) {
         // Load agents from parent directory
         loadAllAgents(join(process.cwd(), '../agents'));
 
-        // Load environmental variables
-        const keys = loadEnvKeys();
+        // Load environmental variables, allow client-supplied keys as override
+        const envKeys = loadEnvKeys();
+        const resolvedGeminiKey = geminiKey || envKeys.GEMINI_API_KEY;
+        const resolvedAnthropicKey = anthropicKey || envKeys.ANTHROPIC_API_KEY;
+        const resolvedDeepSeekKey = deepseekKey || envKeys.DEEPSEEK_API_KEY;
 
-        await sendEvent('init', { message: 'Analyzing goal and planning execution waves...' });
+        const hasKey = Boolean(resolvedGeminiKey || resolvedAnthropicKey || resolvedDeepSeekKey);
+        if (!hasKey) {
+          // No keys: run in offline demo mode. The dispatcher streams mock agent
+          // output and the planner uses heuristics, so the full flow is viewable.
+          await sendEvent('init', { message: 'Demo mode (no API key): simulating a parallel swarm run…' });
+        } else {
+          await sendEvent('init', { message: 'Analyzing goal and planning execution waves...' });
+        }
 
         const writtenFiles: { slug: string; path: string }[] = [];
 
         const result = await runMultiAgentDispatch(combinedGoal, {
           sessionId: activeSessionId,
-          apiKeyAnthropic: keys.ANTHROPIC_API_KEY,
-          apiKeyGemini: keys.GEMINI_API_KEY,
-          onPlan: (agents) => {
-            sendEvent('plan', { agents });
+          apiKeyAnthropic: resolvedAnthropicKey,
+          apiKeyGemini: resolvedGeminiKey,
+          apiKeyDeepSeek: resolvedDeepSeekKey,
+          onPlan: (plan) => {
+            sendEvent('plan', { reasoning: plan.reasoning, agents: plan.agents });
           },
           onFileWritten: (slug, path) => {
             writtenFiles.push({ slug, path });
@@ -83,6 +94,9 @@ export async function POST(req: NextRequest) {
           },
           onAgentComplete: (slug, output) => {
             sendEvent('agent-complete', { slug, output });
+          },
+          onAgentError: (slug, output) => {
+            sendEvent('agent-error', { slug, output });
           },
         });
 

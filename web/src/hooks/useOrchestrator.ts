@@ -84,12 +84,12 @@ export function useOrchestrator(wsUrl: string) {
           setDispatchEvents(prev => [...prev, { agentSlug: msg.agentSlug, timestamp: Date.now() }].slice(-10));
           setAgents((prev) => {
             const idx = prev.findIndex((a) => a.id === msg.agentSlug);
-            const agent = { 
-              id: msg.agentSlug, 
-              role: "Agent", 
-              department: msg.department, 
-              status: "queued", 
-              action: msg.goal, 
+            const agent: Agent = {
+              id: msg.agentSlug,
+              role: "Agent",
+              department: msg.department,
+              status: "queued" as AgentStatus,
+              action: msg.goal,
               tokenCount: 0,
               log: prev[idx]?.log || [],
               tokenStream: "",

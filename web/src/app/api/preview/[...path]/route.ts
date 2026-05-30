@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { readFileSync, existsSync } from 'fs';
-import { join, extname } from 'path';
+import { join, extname, resolve, relative } from 'path';
 
 export async function GET(
   req: NextRequest,
@@ -12,7 +12,12 @@ export async function GET(
     const relativePath = pathParts.join('/');
     
     const baseDir = join(process.cwd(), '../project-output');
-    const filePath = join(baseDir, relativePath || 'index.html');
+    const resolvedBaseDir = resolve(baseDir);
+    const filePath = resolve(baseDir, relativePath || 'index.html');
+    const pathFromBase = relative(resolvedBaseDir, filePath);
+    if (pathFromBase.startsWith('..') || pathFromBase.includes(':')) {
+      return new Response('Invalid preview path', { status: 400 });
+    }
     
     if (!existsSync(filePath)) {
       return new Response('File not found', { status: 404 });

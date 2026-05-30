@@ -1,0 +1,65 @@
+{
+  "color": {
+    "brandPrimary": { "value": "#0A2463", "comment": "Deep authoritative blue, representing trust and stability" },
+    "brandAccent": { "value": "#DAA520", "comment": "Rich gold, representing energy, value, and African heritage" },
+    "textPrimary": { "value": "#212121", "comment": "Dark charcoal for primary text" },
+    "textSecondary": { "value": "#616161", "comment": "Muted grey for secondary text" },
+    "backgroundLight": { "value": "#F5F5F5", "comment": "Light background for panels and cards" },
+    "backgroundDark": { "value": "#1C1C1C", "comment": "Dark background for strategic sections or dark mode" },
+    "success": { "value": "#4CAF50" },
+    "warning": { "value": "#FFC107" },
+    "error": { "value": "#F44336" },
+    "border": { "value": "#E0E0E0" }
+  },
+  "typography": {
+    "fontFamilyPrimary": { "value": "Montserrat, sans-serif", "comment": "Bold and modern for headings" },
+    "fontFamilySecondary": { "value": "Inter, sans-serif", "comment": "Highly readable and functional for body text" },
+    "fontSize": {
+      "xs": { "value": "0.75rem" },
+      "sm": { "value": "0.875rem" },
+      "base": { "value": "1rem" },
+      "lg": { "value": "1.125rem" },
+      "xl": { "value": "1.25rem" },
+      "2xl": { "value": "1.5rem" },
+      "3xl": { "value": "1.875rem" },
+      "4xl": { "value": "2.25rem" },
+      "5xl": { "value": "3rem" }
+    },
+    "fontWeight": {
+      "light": { "value": "300" },
+      "regular": { "value": "400" },
+      "medium": { "value": "500" },
+      "semibold": { "value": "600" },
+      "bold": { "value": "700" }
+    }
+  },
+  "spacing": {
+    "unit": { "value": "4px", "comment": "Base unit for a consistent 4-point grid system" },
+    "xs": { "value": "4px" },
+    "sm": { "value": "8px" },
+    "md": { "value": "16px" },
+    "lg": { "value": "24px" },
+    "xl": { "value": "32px" },
+    "2xl": { "value": "48px" },
+    "3xl": { "value": "64px" }
+  },
+  "borderRadius": {
+    "none": { "value": "0px" },
+    "sm": { "value": "4px" },
+    "md": { "value": "8px" },
+    "lg": { "value": "12px" },
+    "full": { "value": "9999px" }
+  },
+  "shadow": {
+    "sm": { "value": "0px 2px 4px rgba(0, 0, 0, 0.05)" },
+    "md": { "value": "0px 4px 10px rgba(0, 0, 0, 0.1)" },
+    "lg": { "value": "0px 8px 20px rgba(0, 0, 0, 0.15)" }
+  },
+  "breakpoint": {
+    "sm": { "value": "640px" },
+    "md": { "value": "768px" },
+    "lg": "1024px",
+    "xl": "1280px",
+    "2xl": "1536px"
+  }
+}

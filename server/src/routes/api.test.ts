@@ -2,7 +2,7 @@ import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import type { AddressInfo } from "node:net";
 import { createServer, type Server } from "node:http";
-import { createApp } from "../src/app.js";
+import { createApp } from "../app.js";
 
 let server: Server;
 let baseUrl: string;

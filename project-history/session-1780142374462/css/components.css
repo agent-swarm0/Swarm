@@ -1,0 +1,151 @@
+/*
+  This file would contain styles for reusable components,
+  such as buttons, cards, forms, and the theme toggle's active states.
+  For the index.html preview, some of these were inlined in <style> tag.
+*/
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--bg-primary); /* Text color contrasting with primary bg */
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-light);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--primary-color);
+  color: var(--bg-primary);
+}
+
+/* Search Bar */
+.search-bar {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.search-bar::placeholder {
+  color: var(--text-muted);
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.3); /* Assuming var for RGB */
+}
+
+/* Card Component */
+.card {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-6);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border: 1px solid var(--border-color);
+}
+
+.card:hover {
+  box-shadow: 0 8px 15px rgba(0,0,0,0.15); /* Example large shadow */
+  transform: translateY(-2px);
+}
+
+.card h3 {
+  font-size: var(--text-xl);
+  margin: 0;
+  color: var(--primary-color);
+}
+
+.card p {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.card .read-link {
+  margin-top: auto; /* Push to bottom */
+  align-self: flex-start;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+/* Specifics for the Hero Search */
+.hero-search-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  max-width: 600px;
+  margin: 0 auto;
+}
+.hero-search-wrapper .search-bar {
+  flex-grow: 1; /* Allow search bar to expand */
+  max-width: none;
+}
+
+/* Section titles */
+.section-title {
+  text-align: center;
+  margin-bottom: var(--space-10);
+  font-size: var(--text-4xl);
+  color: var(--text-primary);
+}
+
+/* Navigation items hover effect */
+.primary-nav ul li a:hover {
+  color: var(--primary-color);
+}
+
+/* Responsive adjustments for header */
+@media (max-width: 767px) {
+  .header .container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .primary-nav {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .primary-nav .search-bar {
+    max-width: 100%;
+  }
+  .primary-nav ul {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+  .theme-toggle {
+    align-self: flex-end; /* Push to right on mobile */
+  }
+}

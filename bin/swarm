@@ -2,13 +2,16 @@
 // Agent Swarm — Multi-Agent AI Orchestration Platform
 
 import { spawn } from 'child_process';
+import { createServer, connect } from 'net';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { readFileSync } from 'fs';
+import { createRequire } from 'module';
+import { existsSync, readFileSync } from 'fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SWARM_ROOT = join(__dirname, '..');
 const entry = join(SWARM_ROOT, 'dist', 'swarm-entry.js');
+const require = createRequire(import.meta.url);
 
 // ─────────────────────────────────────────────────────────────
 // ANSI helpers (no external deps needed)
@@ -48,6 +51,113 @@ const applyDim = (t) => hasColor ? chalk.dim(t) : t;
 const applyPrimary = (t) => applyHex(SWARM_PRIMARY, t);
 const applyBold = (t) => hasColor ? chalk.bold(t) : t;
 const applyItalic = (t) => hasColor ? chalk.italic(t) : t;
+
+function parseDashboardPort(argv) {
+  const idx = argv.findIndex((a) => a === '--dashboard-port');
+  if (idx >= 0 && argv[idx + 1]) {
+    const parsed = Number(argv[idx + 1]);
+    if (Number.isInteger(parsed) && parsed > 0 && parsed < 65536) return parsed;
+  }
+  const envPort = Number(process.env.SWARM_DASHBOARD_PORT);
+  if (Number.isInteger(envPort) && envPort > 0 && envPort < 65536) return envPort;
+  return 3001;
+}
+
+function stripLauncherArgs(argv) {
+  const filtered = [];
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === '--dashboard-port') {
+      i++;
+      continue;
+    }
+    if (argv[i] === '--no-dashboard') continue;
+    filtered.push(argv[i]);
+  }
+  return filtered;
+}
+
+function isPortFree(port) {
+  return new Promise((resolve) => {
+    const server = createServer();
+    server.once('error', () => resolve(false));
+    server.once('listening', () => {
+      server.close(() => resolve(true));
+    });
+    server.listen(port, '127.0.0.1');
+  });
+}
+
+async function findDashboardPort(preferredPort) {
+  for (let port = preferredPort; port < preferredPort + 20; port++) {
+    if (await isPortFree(port)) return port;
+  }
+  return preferredPort;
+}
+
+function waitForDashboard(port, timeoutMs = 10000) {
+  const startedAt = Date.now();
+  return new Promise((resolve) => {
+    const attempt = () => {
+      const socket = connect(port, '127.0.0.1');
+      socket.once('connect', () => {
+        socket.destroy();
+        resolve(true);
+      });
+      socket.once('error', () => {
+        socket.destroy();
+        if (Date.now() - startedAt > timeoutMs) resolve(false);
+        else setTimeout(attempt, 250);
+      });
+    };
+    attempt();
+  });
+}
+
+function resolveNextBin() {
+  try {
+    return require.resolve('next/dist/bin/next');
+  } catch {
+    const localNextBin = join(SWARM_ROOT, 'web', 'node_modules', 'next', 'dist', 'bin', 'next');
+    return existsSync(localNextBin) ? localNextBin : null;
+  }
+}
+
+async function startDashboard(argv) {
+  if (process.env.SWARM_DASHBOARD === '0' || argv.includes('--no-dashboard')) {
+    return null;
+  }
+
+  const webRoot = join(SWARM_ROOT, 'web');
+  const nextBin = resolveNextBin();
+  if (!existsSync(webRoot) || !nextBin) {
+    process.stderr.write(
+      'swarm: dashboard is not bundled correctly. The TUI will still start.\n',
+    );
+    return null;
+  }
+
+  const preferredPort = parseDashboardPort(argv);
+  const port = await findDashboardPort(preferredPort);
+  const url = `http://127.0.0.1:${port}/dashboard`;
+  const hasProductionBuild = existsSync(join(webRoot, '.next', 'BUILD_ID'));
+  const nextArgs = hasProductionBuild
+    ? [nextBin, 'start', '-p', String(port), '--hostname', '127.0.0.1']
+    : [nextBin, 'dev', '-p', String(port), '--hostname', '127.0.0.1'];
+  const dashboard = spawn(process.execPath, nextArgs, {
+    cwd: webRoot,
+    stdio: ['ignore', 'ignore', 'ignore'],
+    env: {
+      ...process.env,
+      SWARM_ROOT,
+      PORT: String(port),
+      NEXT_TELEMETRY_DISABLED: '1',
+    },
+  });
+
+  dashboard.unref();
+  const ready = await waitForDashboard(port);
+  return { child: dashboard, url, ready };
+}
 
 // ─────────────────────────────────────────────────────────────
 // Version
@@ -352,7 +462,20 @@ process.on('SIGINT', () => {
 await showSplash();
 splashComplete = true;
 
-const child = spawn(process.execPath, [entry, ...process.argv.slice(2)], {
+const rawArgs = process.argv.slice(2);
+const dashboard = await startDashboard(rawArgs);
+if (dashboard) {
+  const status = dashboard.ready ? 'running' : 'starting';
+  process.stdout.write(
+    '\n' +
+      applyBold(applyPrimary(`  Dashboard ${status}: ${dashboard.url}`)) +
+      '\n' +
+      applyDim('  Non-technical users can use this local browser dashboard. Keep this terminal open while it runs.') +
+      '\n\n',
+  );
+}
+
+const child = spawn(process.execPath, [entry, ...stripLauncherArgs(rawArgs)], {
   cwd: process.cwd(),
   stdio: 'inherit',
   env: {
@@ -362,6 +485,9 @@ const child = spawn(process.execPath, [entry, ...process.argv.slice(2)], {
 });
 
 child.on('exit', (code) => {
+  if (dashboard?.child && !dashboard.child.killed) {
+    dashboard.child.kill();
+  }
   const exitCode = code ?? 0;
   if (isTTY && exitCode === 0 && !process.env.CI && !process.env.NO_SPLASH) {
     process.stdout.write('\n' + applyDim('  ' + pick(EXIT_PHRASES)) + '\n\n');

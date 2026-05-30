@@ -6,6 +6,8 @@ export interface GeminiAdapterOptions {
   systemPrompt: string;
   apiKey: string;
   onToken: (token: string) => void;
+  /** Override the model fallback order. Defaults to flash-first (fast). */
+  modelOrder?: string[];
 }
 
 /**
@@ -21,7 +23,7 @@ export async function runGeminiAdapter(options: GeminiAdapterOptions): Promise<v
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const modelOrder = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.5-flash-lite'];
+    const modelOrder = options.modelOrder ?? ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.5-flash-lite'];
     let responseStream;
     let successfulModel = '';
 
@@ -36,8 +38,12 @@ export async function runGeminiAdapter(options: GeminiAdapterOptions): Promise<v
         break; // Successfully got the stream!
       } catch (e: any) {
         const errStr = (e?.message || String(e)).toLowerCase();
-        if (errStr.includes('404') || errStr.includes('not found') || errStr.includes('support')) {
-          console.warn(`[GeminiAdapter] Model ${modelName} not supported/found. Trying next fallback...`);
+        const isMissing = errStr.includes('404') || errStr.includes('not found') || errStr.includes('support');
+        // Also fall through to the next model on rate-limit / quota / overload errors,
+        // so e.g. a quota-limited pro model gracefully drops to flash.
+        const isThrottled = errStr.includes('429') || errStr.includes('quota') || errStr.includes('rate') || errStr.includes('exhaust') || errStr.includes('overload');
+        if (isMissing || isThrottled) {
+          console.warn(`[GeminiAdapter] Model ${modelName} unavailable (${isThrottled ? 'throttled' : 'missing'}). Trying next fallback...`);
           continue;
         }
         throw e; // Reraise fatal auth/network errors immediately
