@@ -1,0 +1,16 @@
+# Build context is the repo root (see server/Dockerfile). Keep it lean.
+**/node_modules
+**/dist
+**/.next
+.git
+web
+src
+recovery
+skills
+commands
+rules
+memory-system
+*.log
+**/.env
+**/.env.*
+!**/.env.example
