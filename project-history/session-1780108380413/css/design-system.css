@@ -1,0 +1,68 @@
+/* css/design-system.css */
+
+/* --- Variables --- */
+:root {
+    /* Colors - Light Theme Defaults */
+    --color-primary: #2196f3; /* Default blue for actions */
+    --color-secondary: #00bcd4; /* Accent color */
+    --color-background: #ffffff; /* Page background */
+    --color-surface: #f7f9fa; /* Card/component background */
+    --color-text-primary: #2c3e50; /* Main text */
+    --color-text-secondary: #7f8c8d; /* Subdued text */
+    --color-border: #e0e0e0;
+    --color-success: #27ae60;
+    --color-warning: #f39c12;
+    --color-error: #e74c3c;
+
+    /* Typography */
+    --font-family-sans: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    --font-size-base: 16px;
+    --font-size-sm: 0.875rem; /* 14px */
+    --font-size-md: 1rem; /* 16px */
+    --font-size-lg: 1.125rem; /* 18px */
+    --font-size-xl: 1.25rem; /* 20px */
+    --font-size-h1: 2.5rem; /* 40px */
+    --font-size-h2: 2rem; /* 32px */
+    --font-size-h3: 1.75rem; /* 28px */
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+    --line-height-base: 1.6;
+
+    /* Spacing */
+    --spacing-xxs: 4px;
+    --spacing-xs: 8px;
+    --spacing-sm: 12px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-xxl: 48px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+
+    /* Border Radius */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+
+    /* Transition */
+    --transition-fast: 0.15s ease-out;
+    --transition-normal: 0.3s ease-in-out;
+}
+
+/* --- Dark Theme Overrides --- */
+html.theme-dark {
+    --color-primary: #64b5f6; /* Lighter blue for dark theme contrast */
+    --color-secondary: #4dd0e1;
+    --color-background: #1a202c; /* Dark background */
+    --color-surface: #2d3748; /* Darker surface */
+    --color-text-primary: #e2e8f0; /* Light text */
+    --color-text-secondary: #a0aec0; /* Subdued light text */
+    --color-border: #4a5568;
+    --color-success: #69f0ae;
+    --color-warning: #ffca28;
+    --color-error: #ef5350;
+}

@@ -1,0 +1,224 @@
+/* css/layout.css */
+
+/* --- Global Resets & Box-sizing --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    color: var(--color-text-primary);
+    background-color: var(--color-background);
+    transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+/* --- Accessibility: Visually Hidden --- */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* --- Layout Container --- */
+.layout-container {
+    max-width: 1280px; /* max_content_width from shared variables */
+    margin-left: auto;
+    margin-right: auto;
+    padding: var(--spacing-md); /* Basic padding for mobile */
+}
+
+/* Media queries for responsive padding */
+@media (min-width: 768px) { /* md breakpoint */
+    .layout-container {
+        padding: var(--spacing-lg);
+    }
+}
+
+/* --- Header Layout --- */
+.layout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    transition: background-color var(--transition-normal), border-color var(--transition-normal);
+}
+
+.layout-header h1 {
+    margin: 0;
+    font-size: var(--font-size-xl); /* Smaller for header */
+}
+
+.global-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex; /* Horizontal navigation */
+    gap: var(--spacing-md);
+}
+
+.global-nav a {
+    text-decoration: none;
+    color: var(--color-text-primary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.global-nav a:hover,
+.global-nav a:focus {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+}
+
+/* --- Main Content Layout --- */
+.layout-main {
+    padding: var(--spacing-lg);
+    min-height: calc(100vh - 120px); /* Rough estimate for header/footer height */
+}
+
+/* --- Footer Layout --- */
+.layout-footer {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-nav a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    margin: 0 var(--spacing-xs);
+}
+
+.footer-nav a:hover {
+    text-decoration: underline;
+}
+
+/* --- Grid Utilities (from Hybrid Component-Based + Utility-First) --- */
+.layout-grid {
+    display: grid;
+}
+
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Add more responsive grid cols as needed, e.g., using @media for md:grid-cols-4 */
+@media (min-width: 768px) {
+    .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.gap-spacing-md { gap: var(--spacing-md); }
+
+/* --- Typography Utilities --- */
+.text-h1 { font-size: var(--font-size-h1); font-weight: var(--font-weight-bold); margin-top: var(--spacing-xl); margin-bottom: var(--spacing-lg); }
+.text-h2 { font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md); }
+.text-h3 { font-size: var(--font-size-h3); font-weight: var(--font-weight-medium); margin-top: var(--spacing-md); margin-bottom: var(--spacing-sm); }
+/* etc. */
+
+/* --- Button base styles (component-like, but utility-first can extend) --- */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    border: 1px solid transparent;
+}
+
+.button-primary {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+}
+.button-primary:hover {
+    opacity: 0.9;
+    box-shadow: var(--shadow-sm);
+}
+
+.button-secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-background);
+}
+.button-secondary:hover {
+    opacity: 0.9;
+    box-shadow: var(--shadow-sm);
+}
+
+.button-outline {
+    background-color: transparent;
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+}
+.button-outline:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* Theme Toggle Button Styling */
+.theme-toggle-button {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-xs);
+    cursor: pointer;
+    font-size: var(--font-size-lg);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; /* Fixed size for aesthetic */
+    height: 40px;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.theme-toggle-button:hover {
+    background-color: var(--color-border);
+}
+
+/* Hide / show icons based on the actual theme applied to HTML element */
+.theme-toggle-button .icon-light,
+.theme-toggle-button .icon-dark,
+.theme-toggle-button .icon-system {
+    display: none;
+}
+
+html[data-theme="light"] .theme-toggle-button .icon-light {
+    display: block;
+}
+html[data-theme="dark"] .theme-toggle-button .icon-dark {
+    display: block;
+}
+/* When system preference is active, show the system icon */
+/* The data-preferred-theme attribute is used here to indicate the *user's preference* for display purposes */
+html[data-preferred-theme="system-preference"] .theme-toggle-button .icon-system {
+    display: block;
+}
+/* We could also show the appropriate light/dark icon if data-theme indicates it */
+html[data-preferred-theme="system-preference"][data-theme="light"] .theme-toggle-button .icon-light {
+    display: block;
+}
+html[data-preferred-theme="system-preference"][data-theme="dark"] .theme-toggle-button .icon-dark {
+    display: block;
+}

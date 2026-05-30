@@ -1,0 +1,115 @@
+/* public/style.css */
+
+/* Minimalistic UI Design Tokens */
+:root {
+    --ui_background_color_new: #1A1A1A;
+    --ui_text_primary_color_new: #F0F0F0;
+    --ui_primary_accent_color_new: #6B9E93; /* Muted teal/sage green */
+    --ui_text_color_muted: #A0A0A0; /* Slightly lighter muted grey for secondary text */
+}
+
+/* Global Styles */
+body {
+    font-family: 'Inter', sans-serif; /* Primary font */
+    background-color: var(--ui_background_color_new);
+    color: var(--ui_text_primary_color_new);
+    line-height: 1.6;
+    overflow-x: hidden; /* Prevent horizontal scroll from transform animations */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif; /* Secondary font for headings */
+    color: var(--ui_text_primary_color_new);
+}
+
+.container {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Hero Section Background Effect */
+.radial-gradient-bg {
+    background: radial-gradient(circle at center, rgba(107, 158, 147, 0.1) 0%, transparent 70%);
+}
+
+/* Keyframe animations (retained from previous versions) */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out forwards;
+    animation-delay: var(--animation-delay, 0s); /* For staggered effects */
+    opacity: 0; /* Ensure it's hidden before animation */
+}
+
+/* Base Tailwind-like Reset (simplified, assuming a preflight or reset is implicitly handled) */
+*, ::before, ::after {
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+    border-color: #e5e7eb; /* Default Tailwind border color */
+}
+a {
+    color: inherit;
+    text-decoration: none;
+}
+button {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Utility Classes (mimicking Tailwind where direct classes aren't explicitly loaded) */
+.text-ui_background_color_new { color: var(--ui_background_color_new); }
+.text-ui_text_primary_color_new { color: var(--ui_text_primary_color_new); }
+.text-ui_primary_accent_color_new { color: var(--ui_primary_accent_color_new); }
+.text-ui_text_color_muted { color: var(--ui_text_color_muted); }
+
+.bg-ui_background_color_new { background-color: var(--ui_background_color_new); }
+.bg-ui_primary_accent_color_new { background-color: var(--ui_primary_accent_color_new); }
+
+.font-ui_primary_font_family { font-family: 'Inter', sans-serif; }
+.font-ui_secondary_font_family { font-family: 'Montserrat', sans-serif; }
+
+
+/* --- Mobile Nav Specific Styles --- */
+/* Tailwind 'md' breakpoint is 768px, so less than this is mobile */
+@media (max-width: 767px) {
+    #navbar-links {
+        position: absolute;
+        top: 100%; /* Position right below the header */
+        left: 0;
+        right: 0;
+        width: 100%;
+        background-color: var(--ui_background_color_new);
+        flex-direction: column;
+        align-items: center;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        z-index: 40; /* Lower than header z-index (50) but higher than main content */
+
+        /* Initial hidden state */
+        transform: translateY(-100%); /* Hides it above the viewport */
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    }
+
+    #navbar-links.navbar-open {
+        transform: translateY(0%); /* Brings it into view */
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+}
