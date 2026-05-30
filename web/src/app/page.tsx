@@ -120,18 +120,19 @@ export default function Home() {
             <a href="#features" className="hidden font-mono text-xs text-ink2 transition-colors hover:text-ink sm:inline">Features</a>
             <a href="#start" className="hidden font-mono text-xs text-ink2 transition-colors hover:text-ink sm:inline">Install</a>
             <a href="https://github.com/Anasabubakar/agent-swarm" target="_blank" rel="noopener noreferrer" className="hidden font-mono text-xs text-ink2 transition-colors hover:text-ink sm:inline">GitHub ↗</a>
+            <a href="/dashboard" className="font-mono text-xs text-ink transition-colors hover:text-green">Sign in</a>
             <a href="/dashboard" className="rounded bg-ink px-[18px] py-[10px] font-mono text-xs text-bg transition-all hover:-translate-y-px hover:bg-green">Get started</a>
           </div>
         </div>
       </nav>
 
-      {/* HERO: text on the left, interactive console card on the right */}
+      {/* HERO — text on the left, interactive console card on the right */}
       <header className="relative overflow-hidden pt-[100px] pb-[72px]">
         <div className="aurora"><span className="blob b1" /><span className="blob b2" /><span className="blob b3" /></div>
         <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-bg/25 via-bg/5 to-bg/80" />
 
         <div className="relative z-[2] mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-8 lg:grid-cols-[1.04fr_.96fr]">
-          {/* LEFT: the words */}
+          {/* LEFT — the words */}
           <div>
             <div className="mb-6 inline-flex items-center gap-[10px] font-mono text-[11px] uppercase tracking-[2.5px] text-green">
               <span className="pulse-dot h-[7px] w-[7px] rounded-full bg-greenb shadow-[0_0_9px_var(--color-greenb)]" />
@@ -154,11 +155,11 @@ export default function Home() {
             </div>
           </div>
 
-          {/* RIGHT: the interactive console card */}
+          {/* RIGHT — the interactive console card */}
           <div className="overflow-hidden rounded-2xl border border-line2 bg-surface shadow-[0_44px_90px_-50px_rgba(10,40,20,.45)]">
             <div className="flex items-center gap-[10px] border-b border-line bg-bg3/60 px-4 py-[13px]">
               <span className="flex gap-[6px]">{[0, 1, 2].map((i) => <i key={i} className="block h-[9px] w-[9px] rounded-full bg-line2" />)}</span>
-              <span className="font-mono text-[11px] tracking-wide text-dim">swarm · orchestrator</span>
+              <span className="font-mono text-[11px] tracking-wide text-dim">swarm — orchestrator</span>
               <span className="ml-auto flex items-center gap-2 font-mono text-[10px] text-green">
                 <span className={`h-[6px] w-[6px] rounded-full ${phase === "running" ? "bg-green pulse-dot" : phase === "done" ? "bg-greenb" : "bg-line2"}`} />
                 {phase === "idle" ? "ready" : phase === "running" ? "running" : "shipped"}
@@ -215,7 +216,7 @@ export default function Home() {
                     {phase === "done" && (
                       <div className="mt-3 flex items-center justify-between rounded-lg bg-green/5 px-3 py-[10px] font-mono text-[12px]">
                         <span className="text-green">✓ shipped in 4.2s · 14 files</span>
-                        <a href="/dashboard" className="text-dim transition-colors hover:text-green">open the console →</a>
+                        <button onClick={reset} className="text-dim transition-colors hover:text-green">run another →</button>
                       </div>
                     )}
                   </>
@@ -225,7 +226,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* THE SWARM: full-width, even radial ripple */}
+        {/* THE SWARM — full-width, even radial ripple */}
         <div className="relative z-[2] mx-auto mt-16 max-w-[1080px] px-8">
           <div className="mb-4 flex items-center justify-between font-mono text-[11px] text-ink2">
             <span className="flex items-center gap-2"><span className="pulse-dot inline-block h-[6px] w-[6px] rounded-full bg-greenv" /> the swarm{phase === "running" ? ", dispatching" : ", live"}</span>
@@ -287,8 +288,8 @@ export default function Home() {
           </div>
           <div className="reveal grid grid-cols-1 gap-5 md:grid-cols-2">
             {[
-              ["01 · install", "npm i -g @anas.abubakar/swarm", "# one global install, Node 18+"],
-              ["02 · run", 'swarm run "ship a landing page"', "# the swarm assembles, works, and ships"],
+              ["01 — install", "npm i -g @anas.abubakar/swarm", "# one global install, Node 18+"],
+              ["02 — run", 'swarm run "ship a landing page"', "# the swarm assembles, works, and ships"],
             ].map(([stepLabel, cmd, note]) => (
               <div key={stepLabel} className="rounded-[10px] border border-[#1b231c] bg-tbg px-[22px] pb-5 pt-6 shadow-[0_30px_60px_-42px_rgba(11,60,30,.5)]">
                 <div className="mb-[15px] font-mono text-[11px] uppercase tracking-[2px] text-mint">{stepLabel}</div>
@@ -309,8 +310,8 @@ export default function Home() {
         <div className="reveal relative z-[1] mx-auto max-w-[1180px] px-8">
           <h2 className="font-serif text-[clamp(42px,6vw,76px)] leading-none tracking-[-.5px]">Your workforce is <em className="italic text-green">one command away.</em></h2>
           <div className="mt-[30px] flex flex-wrap justify-center gap-[13px]">
-            <a href="/dashboard" className="rounded bg-green px-6 py-[15px] font-mono text-[13px] text-white transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_34px_-16px_var(--color-green)]">Get started free →</a>
-            <a href="https://github.com/Anasabubakar/agent-swarm" target="_blank" rel="noopener noreferrer" className="rounded border border-line2 px-6 py-[15px] font-mono text-[13px] text-ink transition-colors hover:border-green hover:text-green">View on GitHub</a>
+            <a href="https://github.com/Anasabubakar/agent-swarm" target="_blank" rel="noopener noreferrer" className="rounded bg-green px-6 py-[15px] font-mono text-[13px] text-white transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_34px_-16px_var(--color-green)]">View on GitHub →</a>
+            <a href="/dashboard" className="rounded border border-line2 px-6 py-[15px] font-mono text-[13px] text-ink transition-colors hover:border-green hover:text-green">Open the console</a>
           </div>
         </div>
       </section>

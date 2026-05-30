@@ -138,7 +138,7 @@ async function startDashboard(argv) {
 
   const preferredPort = parseDashboardPort(argv);
   const port = await findDashboardPort(preferredPort);
-  const url = `http://127.0.0.1:${port}/dashboard`;
+  const url = `http://127.0.0.1:${port}`;
   const hasProductionBuild = existsSync(join(webRoot, '.next', 'BUILD_ID'));
   const nextArgs = hasProductionBuild
     ? [nextBin, 'start', '-p', String(port), '--hostname', '127.0.0.1']
@@ -157,6 +157,74 @@ async function startDashboard(argv) {
   dashboard.unref();
   const ready = await waitForDashboard(port);
   return { child: dashboard, url, ready };
+}
+
+async function startServer() {
+  const serverRoot = join(SWARM_ROOT, 'server');
+  const serverMain = join(serverRoot, 'dist', 'index.js');
+
+  // Check if server is already built, if not try to build it
+  if (!existsSync(serverMain)) {
+    try {
+      const tsConfig = join(serverRoot, 'tsconfig.json');
+      if (existsSync(tsConfig)) {
+        const build = spawn(process.execPath, [
+          require.resolve('typescript/bin/tsc'),
+          '-p', tsConfig
+        ], {
+          cwd: serverRoot,
+          stdio: 'ignore',
+        });
+        await new Promise(resolve => {
+          build.on('exit', resolve);
+        });
+      }
+    } catch (e) {
+      process.stderr.write('swarm: could not build server. Skipping backend.\n');
+      return null;
+    }
+  }
+
+  if (!existsSync(serverMain)) {
+    process.stderr.write('swarm: server not found at ' + serverMain + '. Skipping backend.\n');
+    return null;
+  }
+
+  // Start the server on port 8787
+  const server = spawn(process.execPath, [serverMain], {
+    cwd: serverRoot,
+    stdio: ['ignore', 'ignore', 'ignore'],
+    env: {
+      ...process.env,
+      SWARM_ROOT,
+      PORT: '8787',
+      NODE_ENV: 'development',
+      CORS_ORIGINS: 'http://localhost:3001',
+    },
+  });
+
+  server.unref();
+  
+  // Wait for server to be ready
+  const serverReady = await new Promise((resolve) => {
+    const checkServer = () => {
+      const socket = connect(8787, '127.0.0.1');
+      socket.once('connect', () => {
+        socket.destroy();
+        resolve(true);
+      });
+      socket.once('error', () => {
+        socket.destroy();
+        setTimeout(checkServer, 250);
+      });
+    };
+    
+    // Try for up to 10 seconds
+    const timeout = setTimeout(() => resolve(false), 10000);
+    checkServer();
+  });
+
+  return { child: server, port: 8787, ready: serverReady };
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -463,16 +531,31 @@ await showSplash();
 splashComplete = true;
 
 const rawArgs = process.argv.slice(2);
+
+// Start backend server first
+const server = await startServer();
+if (server) {
+  const status = server.ready ? 'running' : 'starting';
+  process.stdout.write(
+    applyBold(applyPrimary(`  Backend ${status}: http://127.0.0.1:${server.port}`)) +
+    '\n',
+  );
+}
+
+// Then start frontend dashboard
 const dashboard = await startDashboard(rawArgs);
 if (dashboard) {
   const status = dashboard.ready ? 'running' : 'starting';
   process.stdout.write(
+    applyBold(applyPrimary(`  Dashboard ${status}: ${dashboard.url}`)) +
     '\n' +
-      applyBold(applyPrimary(`  Dashboard ${status}: ${dashboard.url}`)) +
-      '\n' +
-      applyDim('  Non-technical users can use this local browser dashboard. Keep this terminal open while it runs.') +
-      '\n\n',
+    applyDim('  Open the link above or visit in your browser to interact with the swarm.') +
+    '\n',
   );
+}
+
+if (server || dashboard) {
+  process.stdout.write('\n');
 }
 
 const child = spawn(process.execPath, [entry, ...stripLauncherArgs(rawArgs)], {
@@ -485,6 +568,9 @@ const child = spawn(process.execPath, [entry, ...stripLauncherArgs(rawArgs)], {
 });
 
 child.on('exit', (code) => {
+  if (server?.child && !server.child.killed) {
+    server.child.kill();
+  }
   if (dashboard?.child && !dashboard.child.killed) {
     dashboard.child.kill();
   }

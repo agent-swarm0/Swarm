@@ -16,7 +16,6 @@
   --color-mint: #8ee29f;
   --color-swarm: #8ee29f;
   --color-tbg: #060f09;
-  --color-red: #c2410c;
 }
 
 @theme inline {
@@ -36,10 +35,9 @@ body {
 @keyframes drift2 { 0%,100%{transform:translate(0,0) scale(1.05)} 50%{transform:translate(-6%,4%) scale(.92)} }
 @keyframes drift3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(5%,-6%) scale(1.12)} }
 @keyframes swarmpulse { 0%{box-shadow:0 0 0 0 rgba(24,187,102,.5)} 70%{box-shadow:0 0 0 8px rgba(24,187,102,0)} 100%{box-shadow:0 0 0 0 rgba(24,187,102,0)} }
-@keyframes swarm-flow { to { stroke-dashoffset: -16; } }
 
 /* ---- aurora ---- */
-.aurora { position:absolute; inset:-25%; z-index:0; filter:blur(72px); opacity:.7; pointer-events:none; }
+.aurora { position:absolute; inset:-25%; z-index:0; filter:blur(72px); opacity:.85; pointer-events:none; }
 .blob { position:absolute; border-radius:9999px; }
 .b1 { width:46vw; height:46vw; left:-6%; top:-12%; background:radial-gradient(circle,rgba(24,187,102,.5),transparent 62%); animation:drift1 20s cubic-bezier(.22,.85,.16,1) infinite; }
 .b2 { width:40vw; height:40vw; right:-8%; top:0; background:radial-gradient(circle,rgba(16,160,88,.42),transparent 62%); animation:drift2 26s cubic-bezier(.22,.85,.16,1) infinite; }
@@ -49,19 +47,19 @@ body {
 .reveal { opacity:0; transform:translateY(20px); transition:opacity .8s cubic-bezier(.22,.85,.16,1), transform .8s cubic-bezier(.22,.85,.16,1); }
 .reveal.in { opacity:1; transform:none; }
 
-/* ---- agent field dots ---- */
+/* ---- misc ---- */
+.pulse-dot { animation:swarmpulse 1.6s infinite; }
 .adot { aspect-ratio:1; border:1px solid var(--color-line2); border-radius:5px; background:var(--color-surface); transition:background .55s, box-shadow .55s, border-color .55s; }
 .adot.on { background:var(--color-greenv); border-color:var(--color-greenv); box-shadow:0 0 14px -2px var(--color-greenv); }
 .adot.warm { background:var(--color-bg3); }
 
-/* ---- misc ---- */
-.pulse-dot { animation:swarmpulse 1.6s infinite; }
-.swarm-edge-active { animation: swarm-flow 0.6s linear infinite; }
-.swarm-mark { font-family:var(--font-mono); font-weight:500; letter-spacing:.34em; color:var(--color-green); }
-
-/* masked key input: avoids type=password so browsers never offer to save it */
-.key-mask { -webkit-text-security: disc; text-security: disc; }
+/* terminal scanline sheen */
+.term-sheen { background:
+  radial-gradient(120% 80% at 50% -10%, rgba(142,226,159,.08), transparent 60%); }
+.swarm-mark { font-family:var(--font-mono); font-weight:500; letter-spacing:.34em;
+  color:var(--color-swarm); text-shadow:0 0 24px rgba(142,226,159,.35); }
 
 @media (prefers-reduced-motion: reduce) {
   *{ animation:none !important; transition:none !important; }
+  .reveal{ opacity:1; transform:none; }
 }
