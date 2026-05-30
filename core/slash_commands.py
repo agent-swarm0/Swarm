@@ -81,6 +81,7 @@ SLASH_COMMANDS: dict[str, str] = {
     "about":      "about Agent Swarm",
     "who":        "who you are in this session",
     "status":     "session snapshot (engine · agent · model · mode)",
+    "api":        "manage api keys and providers",
     "reset":      "reset engine / agent / model to defaults",
     "new":        "clear screen and start a fresh task",
     # Routing
@@ -143,7 +144,7 @@ def _parse(slash_line: str) -> tuple[str, str]:
     return m.group(1).lower(), m.group(2).strip()
 
 
-def _help_text() -> str:
+def _help_text(config_agents=None) -> str:
     sections = [
         ("Session", [
             ("/exit  /quit  /q       ", "leave session"),
@@ -171,11 +172,11 @@ def _help_text() -> str:
             ("/engine [name|clear]   ", "show/set session engine"),
             ("/engines               ", "registry + PATH availability"),
             ("/agent [slug|clear]    ", "agent for interactive chat"),
-            ("/agents [n]            ", "list first n agents (default 40)"),
+            (f"/agents [n]            ", f"list first n agents (default 40, total {len(config_agents) if config_agents else 245})"),
             ("/model [id|clear]      ", "model flag for current engine"),
             ("/inspect <slug>        ", "show agent config detail"),
-            ("/health                ", "check which engines are reachable on PATH"),
-            ("/ping                  ", "same as /health — alias"),
+            ("/health  /ping         ", "check which engines are reachable on PATH"),
+            ("/api                   ", "manage api keys and providers"),
         ]),
         ("Config & Environment", [
             ("/config                ", "dump the active swarm config (pretty)"),
@@ -279,7 +280,13 @@ def handle_slash_line(
 
     # ── Help ──────────────────────────────────────────────────────────────────
     if cmd in ("help", "?"):
-        print(f"\n{CC.BRIGHT_CYAN}{_help_text()}{CC.RESET}")
+        print(f"\n{CC.BRIGHT_CYAN}{_help_text(load_config_fn().get('agents', {}))}{CC.RESET}")
+        return SlashOutcome(consumed=True)
+
+
+    # ── API ───────────────────────────────────────────────────────────────────
+    if cmd == "api":
+        print(f"\n  {CC.BOLD}API Mode Settings{CC.RESET}\n  Currently not implemented in CLI.\n")
         return SlashOutcome(consumed=True)
 
     # ── Exit ──────────────────────────────────────────────────────────────────

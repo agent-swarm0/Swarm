@@ -1,99 +1,108 @@
-# Agent Swarm
+# 🛡️ SWARM v1.0
 
-Multi-agent orchestration from the terminal. One install, many agents, pick your models and tools.
+**Multi-agent orchestration for the modern engineer.**
 
-**Node.js 18+** required.
+SWARM is a high-performance agent orchestrator that allows you to dispatch complex goals to a swarm of specialized AI agents. Whether you're a developer with local CLI agents installed or a user who prefers a plug-and-play API experience, SWARM provides a unified interface to get things done.
 
-**Community:** Discord (living swarm chat) · [GitHub Issues](https://github.com/Anasabubakar/Swarm/issues) (tracked bugs).
+[![Build Status](https://github.com/agent-swarm0/Swarm/actions/workflows/main.yml/badge.svg)](https://github.com/agent-swarm0/Swarm/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## Install / Run
+## 🚀 Two Ways to Swarm
 
-Run from source / dev:
+SWARM operates in two distinct modes to accommodate different user needs:
 
+### 1. CLI Mode (Local Power)
+**For developers who want full control.**
+In CLI mode, SWARM orchestrates local agents installed on your machine (e.g., Claude Code, Gemini CLI). It manages the workspace, handles the goal breakdown, and pipes output from your local tools.
+- **Requirement:** Local CLI agents installed and authenticated.
+- **Best for:** Deep system integration and local file manipulation.
+
+### 2. API Mode (Zero Setup)
+**For everyone else.**
+API mode allows you to use the swarm without installing a single local agent. Simply provide your API key for one of the supported providers, and SWARM calls the models directly via a high-performance API router.
+- **Supported Providers:** OpenAI, Anthropic, Gemini, Groq.
+- **Best for:** Fast prototyping, non-technical users, and cloud-native workflows.
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+- **Node.js 18+**
+- **Python 3.12+** (For CLI mode orchestration)
+
+### Quick Start
 ```bash
-git clone https://github.com/Anasabubakar/Swarm.git
+# Clone the repository
+git clone https://github.com/agent-swarm0/Swarm.git
 cd Swarm
-npm ci
-npm run build          # compiles swarm entry + bootstrap → dist/
-npm install -g .       # link local install for testing and running globally
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Install globally
+npm install -g .
 ```
 
 ---
 
-## Requirements
+## 🛠️ Usage
 
-| What | Why |
-| --- | --- |
-| **Node.js 18+** | Runs the `swarm` launcher and optional Studio UI (`dist/main.js`). |
-| **Python 3** | Default orchestrator (`orchestrator.py`). On first launch, Swarm tries to install Python automatically (Windows: `winget`, macOS: Homebrew when present, Linux: non-interactive `apt`/`dnf` when passwordless sudo works). Override with **`SWARM_PYTHON`** or skip auto-setup with **`SWARM_SKIP_DEPS_BOOTSTRAP=1`**. |
-
-**Windows note:** teammate “split panes” use **tmux** on Linux/macOS. On native Windows terminals, teammates run **in‑process** (no WSL required). Want real tmux tiling? Use **WSL** or Linux/macOS.
-
----
-
-## Usage
-
+### Running in CLI Mode
+Launch the interactive TUI or pass a goal directly:
 ```bash
-# Interactive swarm (Python orchestrator)
+# Interactive mode
 swarm
 
-# Pass-through to orchestrator examples
-swarm --list-agents
-swarm "your objective here"
-
-# Full Ink/React Studio (needs dist/main.js in the package)
-SWARM_STUDIO=1 swarm
-# or: swarm --studio
+# Direct goal execution
+swarm "Build a landing page with Tailwind CSS"
 ```
 
-Disable optional prompts:
-
+### Running in API Mode
+Use the `--provider` and `--api-key` flags to bypass local installation:
 ```bash
-export SWARM_SKIP_DEPS_BOOTSTRAP=1    # skip Python auto-install attempts
+# Use OpenAI
+swarm --provider openai --api-key sk-your-key-here "Create a REST API for a bookstore"
+
+# Use Anthropic
+swarm --provider anthropic --api-key sk-ant-your-key-here "Audit this codebase for security flaws"
 ```
 
----
-
-## Community — living swarm
-
-Ships fly better together. Discord is where people hang out, share setups, shout about releases, and get unstuck quickly. GitHub stays the **source of truth** for bugs that need reproduction and fixes.
-
-### Where to go
-
-| Place | Best for |
-| --- | --- |
-| **Discord** | Chat, help, showcases, vibes, announcements (you run the server) |
-| **[GitHub Issues](https://github.com/Anasabubakar/agent-swarm/issues)** | Crashes, reproducible bugs, concrete feature asks |
-| **[GitHub Discussions](https://github.com/Anasabubakar/agent-swarm/discussions)** | Long proposals, FAQs, brainstorming (optional — enable in repo settings if you want it) |
-
-**Discord invite (you add this once):**
-
-1. In Discord: **Create my server** (or use one you already run).
-2. **Settings → Invite people → Edit invite link** → expiration **Never** → generate link.
-3. Replace the URL below with yours in this README and commit.
-
-👉 **[Join the Swarm Discord](https://discord.gg/REPLACE_ME_WITH_YOUR_INVITE)** ← change `REPLACE_ME_WITH_YOUR_INVITE` only (leave `https://discord.gg/` as-is).
-
-### Channel ideas that keep the swarm alive
-
-- `#announcements` — releases, changelog highlights (muted by default OK).
-- `#intro` — who you are, what you ship.
-- `#help` — quick questions (`swarm` errors, Python, installs).
-- `#bugs` — “open a GitHub Issue + drop the link here” reminder in the pinned post.
-- `#showcase` — agents, demos, pipelines.
-
-Pin one short rule: **no API keys**, **be respectful**.
-
-### Contributing
-
-Issues and PRs are welcome. For behavior changes or big ideas, an Issue first helps everyone orient; small doc fixes can go straight as a PR.
+### Useful Commands
+- `swarm --agents`: List all 245+ available specialized agents.
+- `swarm --agent [slug] "goal"`: Dispatch a specific agent for a task.
+- `/help`: Show all available slash commands within the TUI.
 
 ---
 
-## Philosophy
+## 🔑 Provider Setup Guide
 
-Composable agents, parallel work, minimal ceremony: your keys, your machine, registry updates when you choose.
+To use API Mode, you will need an API key from one of these providers:
 
-MIT License.
+| Provider | Where to get your key | Recommended Model |
+| :--- | :--- | :--- |
+| **OpenAI** | [platform.openai.com](https://platform.openai.com) | GPT-4o |
+| **Anthropic** | [console.anthropic.com](https://console.anthropic.com) | Claude 3.5 Sonnet |
+| **Gemini** | [aistudio.google.com](https://aistudio.google.com) | Gemini 1.5 Pro |
+| **Groq** | [console.groq.com](https://console.groq.com) | Llama 3 70B |
+
+---
+
+## 👥 Team Credits
+
+Developed during a high-intensity 19-hour sprint by:
+- **Anas** — Lead / Orchestration
+- **Saheed** — Backend / API Layer
+- **David** — Web Dashboard
+- **Annointed** — Agent Engine
+- **Lekan** — CLI + QA
+
+---
+
+## 📄 License
+MIT License. See `LICENSE` for details.
