@@ -8,6 +8,8 @@
 import { Router } from "express";
 import { listProviders } from "../providers/index.js";
 import { activeRunCount, totalRunCount } from "../services/runRegistry.js";
+import { activeRunningCount, queueDepth } from "../services/runQueue.js";
+import { getConcurrencyCap } from "../services/swarmConfig.js";
 import { WS_PROTOCOL_VERSION } from "../websocket/protocol.js";
 import { activeRoomCount, totalClientCount } from "../websocket/hub.js";
 import { PROVIDER_NAMES, type RunMode } from "../types/index.js";
@@ -27,6 +29,11 @@ statusRouter.get("/api/status", (_req, res) => {
     runs: {
       active: activeRunCount(),
       total: totalRunCount(),
+    },
+    queue: {
+      running: activeRunningCount(),
+      waiting: queueDepth(),
+      concurrencyCap: getConcurrencyCap(),
     },
     ws: {
       protocolVersion: WS_PROTOCOL_VERSION,
