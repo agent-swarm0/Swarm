@@ -43,6 +43,18 @@ export interface WsAgentStatusFrame extends WsFrameBase {
   state: "started" | "finished" | "failed";
 }
 
+/**
+ * Server → client: the run's position in the concurrency queue.
+ * `position` is 1-based while queued, or 0 once it has started running.
+ * `depth` is the total number of runs currently waiting.
+ */
+export interface WsQueueStatusFrame extends WsFrameBase {
+  type: "queue_status";
+  requestId: string;
+  position: number;
+  depth: number;
+}
+
 /** Server → client: the run finished successfully. */
 export interface WsDoneFrame extends WsFrameBase {
   type: "done";
@@ -62,6 +74,7 @@ export type WsServerFrame =
   | WsWelcomeFrame
   | WsTokenFrame
   | WsAgentStatusFrame
+  | WsQueueStatusFrame
   | WsDoneFrame
   | WsErrorFrame;
 
