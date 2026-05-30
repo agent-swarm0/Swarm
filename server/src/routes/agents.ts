@@ -1,35 +1,35 @@
 /**
- * GET /api/agents — agent catalog for the dashboard.
- *
- * Returns the full agent list (or one category via `?category=`), plus the set
- * of categories so the UI can build filters without a second request.
+ * Agent Metadata Routes
+ * Provides access to agent dossiers and system prompts.
  */
 import { Router } from "express";
-import {
-  listAgents,
-  listAgentsByCategory,
-  listCategories,
-} from "../services/agentCatalog.js";
-
-export const agentsRouter = Router();
-
-agentsRouter.get("/api/agents", (req, res) => {
-  const category = req.query.category;
-
-  if (typeof category === "string" && category.trim()) {
-    const agents = listAgentsByCategory(category);
-    res.status(200).json({
-      category: category.trim(),
-      count: agents.length,
-      agents,
-    });
-    return;
+import { listAgents, getAgentSystemPrompt } from "../services/agentCatalog.js";
+import { logger } from "../utils/logger.js";
+ 
+const router = Router();
+ 
+// Get agent metadata
+router.get("/:slug", (req, res) => {
+  const { slug } = req.params;
+  const agent = listAgents().find((a) => a.slug === slug);
+  
+  if (!agent) {
+    return res.status(404).json({ error: `Agent ${slug} not found` });
   }
-
-  const agents = listAgents();
-  res.status(200).json({
-    count: agents.length,
-    categories: listCategories(),
-    agents,
-  });
+  
+  res.json(agent);
 });
+ 
+// Get agent system prompt
+router.get("/:slug/prompt", (req, res) => {
+  const { slug } = req.params;
+  const prompt = getAgentSystemPrompt(slug);
+  
+  if (!prompt) {
+    return res.status(404).json({ error: `Prompt for agent ${slug} not found` });
+  }
+  
+  res.json({ prompt });
+});
+ 
+export default router;

@@ -1,26 +1,42 @@
 "use client";
-
+ 
 import { useEffect, useRef } from "react";
-
-type A = { id: string; role: string; status: string };
-
-export default function OrchestratorGraph({ agents, active }: { agents: A[]; active: boolean }) {
+ 
+type Agent = { id: string; role: string; status: string; department: string };
+type DispatchEvent = { agentSlug: string; timestamp: number };
+type OrchestratorState = { goal: string; isThinking: boolean; plan: any; currentWave: number };
+ 
+export default function OrchestratorGraph({ 
+  agents, 
+  active, 
+  orchestrator, 
+  dispatchEvents 
+}: { 
+  agents: Agent[]; 
+  active: boolean; 
+  orchestrator: OrchestratorState;
+  dispatchEvents: DispatchEvent[];
+}) {
   const ref = useRef<HTMLCanvasElement>(null);
   const agentsRef = useRef(agents);
   agentsRef.current = agents;
   const activeRef = useRef(active);
   activeRef.current = active;
-
+  const orchRef = useRef(orchestrator);
+  orchRef.current = orchestrator;
+  const dispatchRef = useRef(dispatchEvents);
+  dispatchRef.current = dispatchEvents;
+ 
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
+ 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let W = 0, H = 0, raf = 0;
-
+ 
     const resize = () => {
       const r = canvas.getBoundingClientRect();
       W = r.width; H = r.height;
@@ -31,10 +47,17 @@ export default function OrchestratorGraph({ agents, active }: { agents: A[]; act
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
-
-    const MINT = "#8ee29f", GREEN = "#18bb66", AMBER = "#e3c074";
+ 
+    // GOD MODE COLORS
+    const LIME = "#e8ff47";
+    const RED = "#ff3d00";
+    const CYAN = "#00e5ff";
+    const GREEN = "#b8ff57";
+    const DIM = "rgba(120,140,127,.3)";
+    const BG_GLOW = "rgba(24,70,42,.4)";
+ 
     const t0 = performance.now();
-
+ 
     const quad = (p0: number[], c: number[], p1: number[], t: number) => {
       const u = 1 - t;
       return [
@@ -42,120 +65,168 @@ export default function OrchestratorGraph({ agents, active }: { agents: A[]; act
         u * u * p0[1] + 2 * u * t * c[1] + t * t * p1[1],
       ];
     };
-
+ 
     const frame = (now: number) => {
       const time = (now - t0) / 1000;
       const ags = agentsRef.current;
+      const orch = orchRef.current;
+      const dispatches = dispatchRef.current;
       const n = Math.max(ags.length, 1);
       const cx = W / 2, cy = H / 2;
       const R = Math.min(W * 0.42, H * 0.4);
-
+ 
       ctx.clearRect(0, 0, W, H);
-
-      // depth grid of faint dots
+ 
+      // depth grid
       ctx.fillStyle = "rgba(120,160,130,.05)";
       const gap = 34;
       for (let gx = (W % gap) / 2; gx < W; gx += gap)
         for (let gy = (H % gap) / 2; gy < H; gy += gap) { ctx.beginPath(); ctx.arc(gx, gy, 1, 0, 7); ctx.fill(); }
-
+ 
       // ambient core glow
       const vg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.55);
-      vg.addColorStop(0, activeRef.current ? "rgba(24,70,42,.5)" : "rgba(18,45,30,.34)");
+      vg.addColorStop(0, activeRef.current ? BG_GLOW : "rgba(18,45,30,.34)");
       vg.addColorStop(1, "rgba(6,15,9,0)");
       ctx.fillStyle = vg;
       ctx.fillRect(0, 0, W, H);
-
+ 
       const pos = ags.map((_, i) => {
         const a = (i / n) * Math.PI * 2 - Math.PI / 2;
         return { x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, a };
       });
-
+ 
       // curved edges + packets
       ags.forEach((ag, i) => {
         const p = pos[i];
-        const working = ag.status === "working", done = ag.status === "done", blocked = ag.status === "blocked";
+        const status = ag.status;
         const mx = (cx + p.x) / 2, my = (cy + p.y) / 2;
         const nx = -(p.y - cy), ny = (p.x - cx);
         const len = Math.hypot(nx, ny) || 1;
         const bow = R * 0.16;
         const ctrl = [mx + (nx / len) * bow, my + (ny / len) * bow];
-
+ 
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.quadraticCurveTo(ctrl[0], ctrl[1], p.x, p.y);
-        ctx.strokeStyle = blocked ? "rgba(227,192,116,.55)" : working ? "rgba(142,226,159,.5)" : done ? "rgba(24,187,102,.3)" : "rgba(90,120,98,.16)";
-        ctx.lineWidth = working || blocked ? 1.8 : 1;
+        
+        // Edge color based on status
+        let color = DIM;
+        if (status === "active") color = "rgba(232,255,71,0.5)";
+        else if (status === "thinking") color = "rgba(0,229,255,0.5)";
+        else if (status === "done") color = "rgba(184,255,87,0.3)";
+        else if (status === "error") color = "rgba(255,61,0,0.5)";
+        
+        ctx.strokeStyle = color;
+        ctx.lineWidth = (status === "active" || status === "thinking") ? 2 : 1;
         ctx.stroke();
-
-        if (working && !reduce) {
-          for (let k = 0; k < 4; k++) {
-            const t = (time * 0.55 + k / 4) % 1;
+ 
+        // Dispatch particles
+        const dispatch = dispatches.find(d => d.agentSlug === ag.id);
+        if (dispatch && !reduce) {
+          const age = (now - dispatch.timestamp) / 1000;
+          if (age < 0.4) {
+            const t = age / 0.4;
             const q = quad([cx, cy], ctrl, [p.x, p.y], t);
             ctx.beginPath();
-            ctx.arc(q[0], q[1], 2.6, 0, 7);
-            ctx.fillStyle = MINT;
-            ctx.shadowColor = MINT; ctx.shadowBlur = 12;
+            ctx.arc(q[0], q[1], 3, 0, 7);
+            ctx.fillStyle = LIME;
+            ctx.shadowColor = LIME; ctx.shadowBlur = 15;
             ctx.fill(); ctx.shadowBlur = 0;
           }
         }
+ 
+        // Active state particles (constant stream)
+        if (status === "active" && !reduce) {
+          for (let k = 0; k < 3; k++) {
+            const t = (time * 0.6 + k / 3) % 1;
+            const q = quad([cx, cy], ctrl, [p.x, p.y], t);
+            ctx.beginPath();
+            ctx.arc(q[0], q[1], 2, 0, 7);
+            ctx.fillStyle = LIME;
+            ctx.fill();
+          }
+        }
       });
-
+ 
       // agent nodes
       ags.forEach((ag, i) => {
         const p = pos[i];
-        const working = ag.status === "working", done = ag.status === "done", blocked = ag.status === "blocked";
-        const pulse = working ? 1 + Math.sin(time * 4 + i) * 0.1 : 1;
+        const status = ag.status;
+        let nodeColor = DIM;
+        let glowColor = "transparent";
+        let pulse = 1;
+ 
+        if (status === "active") { nodeColor = LIME; glowColor = LIME; pulse = 1 + Math.sin(time * 5) * 0.05; }
+        else if (status === "thinking") { nodeColor = CYAN; glowColor = CYAN; pulse = 1 + Math.sin(time * 3) * 0.08; }
+        else if (status === "done") { nodeColor = GREEN; glowColor = "transparent"; }
+        else if (status === "error") { nodeColor = RED; glowColor = RED; }
+        else if (status === "queued") { nodeColor = "#e3c074"; glowColor = "transparent"; }
+ 
         const rad = 24 * pulse;
-
-        if (working) { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(time * 1.4); ctx.beginPath(); ctx.setLineDash([3, 7]); ctx.arc(0, 0, rad + 7, 0, 7); ctx.strokeStyle = "rgba(142,226,159,.5)"; ctx.lineWidth = 1.4; ctx.stroke(); ctx.setLineDash([]); ctx.restore(); }
-
+ 
+        // Node ring for thinking/active
+        if ((status === "active" || status === "thinking") && !reduce) {
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(time * 1.5);
+          ctx.beginPath(); ctx.setLineDash([4, 8]); ctx.arc(0, 0, rad + 8, 0, 7);
+          ctx.strokeStyle = nodeColor; ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+        }
+ 
         ctx.beginPath();
         ctx.arc(p.x, p.y, rad, 0, 7);
         ctx.fillStyle = "#0c1a11";
-        if (working) { ctx.shadowColor = MINT; ctx.shadowBlur = 24; }
-        else if (blocked) { ctx.shadowColor = AMBER; ctx.shadowBlur = 18; }
+        if (glowColor !== "transparent") { ctx.shadowColor = glowColor; ctx.shadowBlur = 20; }
         ctx.fill(); ctx.shadowBlur = 0;
         ctx.lineWidth = 2;
-        ctx.strokeStyle = working ? MINT : done ? GREEN : blocked ? AMBER : "rgba(120,140,127,.5)";
+        ctx.strokeStyle = nodeColor;
         ctx.stroke();
-
-        // initial inside
-        ctx.fillStyle = working ? MINT : done ? GREEN : "rgba(170,186,172,.85)";
-        ctx.font = "600 15px ui-sans-serif, system-ui, sans-serif";
-        ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.fillText(ag.role.charAt(0).toUpperCase(), p.x, p.y + 0.5);
-
-        // role label below
+ 
+        // Label
         ctx.fillStyle = "rgba(190,205,192,.9)";
         ctx.font = "11px ui-monospace, monospace";
-        ctx.textBaseline = "alphabetic";
-        ctx.fillText(ag.role, p.x, p.y + rad + 16);
-        ctx.fillStyle = working ? "rgba(142,226,159,.8)" : done ? "rgba(24,187,102,.7)" : "rgba(120,140,127,.6)";
+        ctx.textAlign = "center";
+        ctx.fillText(ag.role || ag.id, p.x, p.y + rad + 16);
+        ctx.fillStyle = nodeColor;
         ctx.font = "9px ui-monospace, monospace";
-        ctx.fillText(done ? "done" : working ? "working" : blocked ? "blocked" : "idle", p.x, p.y + rad + 28);
+        ctx.fillText(status, p.x, p.y + rad + 28);
       });
-
-      // orchestrator core
-      const op = 1 + Math.sin(time * 2) * 0.05;
-      ctx.save(); ctx.translate(cx, cy); ctx.rotate(time * (activeRef.current ? 0.6 : 0.2));
-      ctx.beginPath(); ctx.setLineDash([5, 10]); ctx.arc(0, 0, 42 * op, 0, 7);
-      ctx.strokeStyle = "rgba(142,226,159,.55)"; ctx.lineWidth = 1.6; ctx.stroke(); ctx.setLineDash([]); ctx.restore();
-
-      ctx.beginPath(); ctx.arc(cx, cy, 30 * op, 0, 7);
+ 
+      // ORCHESTRATOR CORE (GOD MODE)
+      const coreOp = 1 + Math.sin(time * 2) * 0.03;
+      
+      // Radiating rings when thinking
+      if (orch.isThinking && !reduce) {
+        for (let r = 0; r < 3; r++) {
+          const ringT = (time * 0.5 + r / 3) % 1;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 40 + ringT * 100, 0, 7);
+          ctx.strokeStyle = `rgba(232,255,71, ${0.3 * (1 - ringT)})`;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      }
+ 
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(time * (activeRef.current ? 0.4 : 0.1));
+      ctx.beginPath(); ctx.setLineDash([6, 12]); ctx.arc(0, 0, 45 * coreOp, 0, 7);
+      ctx.strokeStyle = "rgba(142,226,159,0.4)"; ctx.lineWidth = 1.8; ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+ 
+      ctx.beginPath(); ctx.arc(cx, cy, 32 * coreOp, 0, 7);
       ctx.fillStyle = "#0b2014";
-      ctx.shadowColor = GREEN; ctx.shadowBlur = activeRef.current ? 34 : 16;
+      ctx.shadowColor = LIME; ctx.shadowBlur = activeRef.current ? 30 : 10;
       ctx.fill(); ctx.shadowBlur = 0;
-      ctx.lineWidth = 2.4; ctx.strokeStyle = MINT; ctx.stroke();
-      ctx.fillStyle = MINT; ctx.font = "600 12px ui-monospace, monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText("swarm", cx, cy + 0.5);
-      ctx.textBaseline = "alphabetic";
-
+      ctx.lineWidth = 2.5; ctx.strokeStyle = LIME; ctx.stroke();
+      
+      // Goal streaming text inside core
+      ctx.fillStyle = LIME; ctx.font = "600 11px ui-monospace, monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      const goalText = orch.goal || "swarm";
+      const displayedGoal = goalText.slice(0, Math.floor(time * 10) % (goalText.length + 1));
+      ctx.fillText(displayedGoal || "swarm", cx, cy);
+ 
       raf = requestAnimationFrame(frame);
     };
-
+ 
     raf = requestAnimationFrame(frame);
     return () => { cancelAnimationFrame(raf); ro.disconnect(); };
   }, []);
-
+ 
   return <canvas ref={ref} className="block h-full w-full" />;
 }

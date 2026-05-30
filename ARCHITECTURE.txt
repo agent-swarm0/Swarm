@@ -1,0 +1,128 @@
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         SWARM DASHBOARD ARCHITECTURE                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────┐         ┌──────────────────────┐         ┌──────────────────────┐
+│   PYTHON LAYER       │         │   NODE.JS LAYER      │         │   BROWSER LAYER      │
+│   (Orchestrator)     │         │   (WebSocket Server) │         │   (Dashboard UI)     │
+└──────────────────────┘         └──────────────────────┘         └──────────────────────┘
+
+┌──────────────────────┐         ┌──────────────────────┐         ┌──────────────────────┐
+│  orchestrator.py     │         │  Express Server      │         │  Next.js App         │
+│                      │         │  :3000               │         │  :3001               │
+│  ┌────────────────┐  │         │                      │         │                      │
+│  │ Phase: PLANNER │  │         │  ┌────────────────┐  │         │  ┌────────────────┐  │
+│  │ Agent: planner │  │         │  │ orchestrator   │  │         │  │ Dashboard Page │  │
+│  │ Status: working│  │         │  │ State Manager  │  │         │  │                │  │
+│  └────────┬───────┘  │         │  └────────┬───────┘  │         │  │ ┌────────────┐ │  │
+│           │          │         │           │          │         │  │ │ Graph View │ │  │
+│           │ emit     │         │           │ broadcast│         │  │ │            │ │  │
+│           ▼          │         │           ▼          │         │  │ │ Agents: 6  │ │  │
+│  ┌────────────────┐  │         │  ┌────────────────┐  │         │  │ │ Active: 2  │ │  │
+│  │ websocket_     │  │  HTTP   │  │ WebSocket      │  │   WS    │  │ └────────────┘ │  │
+│  │ bridge.py      │──┼─POST───▶│  │ /ws/           │──┼────────▶│  │                │  │
+│  │                │  │         │  │ orchestrator   │  │         │  │ ┌────────────┐ │  │
+│  │ • session_     │  │         │  │                │  │         │  │ │ Live Logs  │ │  │
+│  │   started()    │  │         │  │ Broadcasts to  │  │         │  │ │            │ │  │
+│  │ • agent_       │  │         │  │ all connected  │  │         │  │ │ planner-00 │ │  │
+│  │   updated()    │  │         │  │ clients        │  │         │  │ │ > Created  │ │  │
+│  │ • log_entry()  │  │         │  │                │  │         │  │ │   5 tasks  │ │  │
+│  │ • approval_    │  │         │  └────────────────┘  │         │  │ └────────────┘ │  │
+│  │   requested()  │  │         │                      │         │  │                │  │
+│  └────────────────┘  │         │  ┌────────────────┐  │         │  │ ┌────────────┐ │  │
+│                      │         │  │ HTTP Routes    │  │         │  │ │ Artifacts  │ │  │
+│                      │         │  │                │  │         │  │ │            │ │  │
+│                      │         │  │ POST /api/     │  │         │  │ │ ✓ plan.md  │ │  │
+│                      │         │  │ orchestrator/  │  │         │  │ │ ✓ app.tsx  │ │  │
+│                      │         │  │ events         │  │         │  │ └────────────┘ │  │
+│                      │         │  │                │  │         │  └────────────────┘  │
+│                      │         │  │ POST /api/     │  │         │                      │
+│                      │         │  │ orchestrator/  │  │         │  ┌────────────────┐  │
+│                      │         │  │ start          │  │         │  │ useOrchestrator│  │
+│                      │         │  └────────────────┘  │         │  │ Hook           │  │
+│                      │         │                      │         │  │                │  │
+│                      │         │                      │         │  │ • agents[]     │  │
+│                      │         │                      │         │  │ • logs[]       │  │
+│                      │         │                      │         │  │ • artifacts[]  │  │
+│                      │         │                      │         │  │ • approval?    │  │
+│                      │         │                      │         │  └────────────────┘  │
+└──────────────────────┘         └──────────────────────┘         └──────────────────────┘
+
+                                                                    
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              EVENT FLOW                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. User types goal in dashboard
+   └─▶ WebSocket command: { type: "session.start", goal: "..." }
+
+2. Node.js receives command
+   └─▶ Spawns Python process: python3 ./bin/swarm "goal"
+
+3. Python orchestrator runs
+   └─▶ Emits events via bridge.agent_updated(), bridge.log_entry(), etc.
+
+4. Bridge POSTs to Node.js
+   └─▶ POST http://localhost:3000/api/orchestrator/events
+
+5. Node.js broadcasts to WebSocket clients
+   └─▶ All connected dashboards receive event
+
+6. Dashboard updates UI
+   └─▶ Graph animates, logs scroll, agents update status
+
+7. Approval needed?
+   └─▶ Dashboard shows modal, waits for user decision
+   └─▶ User clicks Approve/Deny
+   └─▶ WebSocket command: { type: "approval.respond", approved: true }
+   └─▶ Python orchestrator continues
+
+8. Session completes
+   └─▶ bridge.session_completed(success=True, duration=45.2)
+   └─▶ Dashboard shows "Shipped" state
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           EVENT TYPES                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Server → Client (Outbound)
+├─ session.started       { sessionId, goal, timestamp }
+├─ phase.changed         { phase: { name, status, startedAt } }
+├─ agent.updated         { agent: { id, role, department, status, action } }
+├─ log.entry             { log: { agentId, timestamp, level, message, artifact? } }
+├─ artifact.created      { path, url? }
+├─ approval.requested    { approval: { id, agentId, action, reason, risk } }
+└─ session.completed     { sessionId, success, duration }
+
+Client → Server (Inbound)
+├─ session.start         { goal }
+├─ session.stop          { sessionId }
+├─ approval.respond      { approvalId, approved }
+└─ ping                  { }
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         AGENT STATUS FLOW                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    idle ──▶ queued ──▶ working ──▶ done
+                            │
+                            ├──▶ blocked (approval needed)
+                            │         │
+                            │         └──▶ working (approved)
+                            │
+                            └──▶ error (failed)
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         PHASE PROGRESSION                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    QUESTIONNAIRE ──▶ PLANNER ──▶ EXECUTE ──▶ DEBUG ──▶ SHIP
+         │                                       ▲
+         │                                       │
+         └───────────────────────────────────────┘
+                    (loop if needed)
+```

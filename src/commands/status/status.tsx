@@ -1,8 +1,57 @@
 import * as React from 'react';
+import { Box, Text } from '../../ink.js';
+import { useTuiOrchestrator } from '../../hooks/useTuiOrchestrator.js';
 import type { LocalJSXCommandContext } from '../../commands.js';
-import { Settings } from '../../components/Settings/Settings.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
-export async function call(onDone: LocalJSXCommandOnDone, context: LocalJSXCommandContext): Promise<React.ReactNode> {
-  return <Settings onClose={onDone} context={context} defaultTab="Status" />;
+import { Dialog } from '../../components/design-system/Dialog.js';
+
+function GodModeStatus({ onDone }: { onDone: LocalJSXCommandOnDone }): React.ReactNode {
+  const { agents, phase, orchestrator } = useTuiOrchestrator("ws://localhost:3000/ws/orchestrator");
+
+  return (
+    <Dialog title="GOD MODE: Swarm Status" onCancel={() => onDone()} color="success">
+      <Box flexDirection="column" width="100%">
+        <Box marginBottom={1} borderBottomDimColor borderStyle="single" width="100%">
+          <Text bold>Current Phase: </Text>
+          <Text color="suggestion">{phase.toUpperCase()}</Text>
+        </Box>
+
+        <Box marginBottom={1}>
+          <Text bold>Orchestrator Goal: </Text>
+          <Text>{orchestrator.goal || "No active goal"}</Text>
+          {orchestrator.isThinking && <Text color="suggestion"> [THINKING...]</Text>}
+        </Box>
+
+        <Box marginTop={1} marginBottom={1}>
+          <Text bold underline>Agent Fleet</Text>
+        </Box>
+
+        {agents.length === 0 ? (
+          <Text dimColor>No agents dispatched yet.</Text>
+        ) : (
+          <Box flexDirection="column">
+            {agents.map(agent => (
+              <Box key={agent.id} flexDirection="row" marginBottom={0.5}>
+                <Text width={20} truncate>{agent.id}</Text>
+                <Text width={15} dimColor>{agent.role}</Text>
+                <Text width={15} color={agent.status === 'active' ? 'success' : agent.status === 'error' ? 'error' : 'suggestion'}>
+                  {agent.status.toUpperCase()}
+                </Text>
+                <Text dimColor>{agent.action}</Text>
+                {agent.tokenCount && <Text dimColor> ({agent.tokenCount} tokens)</Text>}
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        <Box marginTop={1} borderTopDimColor borderStyle="single" width="100%">
+          <Text dimColor>Press Esc to exit God Mode Status</Text>
+        </Box>
+      </Box>
+    </Dialog>
+  );
 }
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJSZWFjdCIsIkxvY2FsSlNYQ29tbWFuZENvbnRleHQiLCJTZXR0aW5ncyIsIkxvY2FsSlNYQ29tbWFuZE9uRG9uZSIsImNhbGwiLCJvbkRvbmUiLCJjb250ZXh0IiwiUHJvbWlzZSIsIlJlYWN0Tm9kZSJdLCJzb3VyY2VzIjpbInN0YXR1cy50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0ICogYXMgUmVhY3QgZnJvbSAncmVhY3QnXG5pbXBvcnQgdHlwZSB7IExvY2FsSlNYQ29tbWFuZENvbnRleHQgfSBmcm9tICcuLi8uLi9jb21tYW5kcy5qcydcbmltcG9ydCB7IFNldHRpbmdzIH0gZnJvbSAnLi4vLi4vY29tcG9uZW50cy9TZXR0aW5ncy9TZXR0aW5ncy5qcydcbmltcG9ydCB0eXBlIHsgTG9jYWxKU1hDb21tYW5kT25Eb25lIH0gZnJvbSAnLi4vLi4vdHlwZXMvY29tbWFuZC5qcydcblxuZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGNhbGwoXG4gIG9uRG9uZTogTG9jYWxKU1hDb21tYW5kT25Eb25lLFxuICBjb250ZXh0OiBMb2NhbEpTWENvbW1hbmRDb250ZXh0LFxuKTogUHJvbWlzZTxSZWFjdC5SZWFjdE5vZGU+IHtcbiAgcmV0dXJuIDxTZXR0aW5ncyBvbkNsb3NlPXtvbkRvbmV9IGNvbnRleHQ9e2NvbnRleHR9IGRlZmF1bHRUYWI9XCJTdGF0dXNcIiAvPlxufVxuIl0sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLEtBQUtBLEtBQUssTUFBTSxPQUFPO0FBQzlCLGNBQWNDLHNCQUFzQixRQUFRLG1CQUFtQjtBQUMvRCxTQUFTQyxRQUFRLFFBQVEsdUNBQXVDO0FBQ2hFLGNBQWNDLHFCQUFxQixRQUFRLHdCQUF3QjtBQUVuRSxPQUFPLGVBQWVDLElBQUlBLENBQ3hCQyxNQUFNLEVBQUVGLHFCQUFxQixFQUM3QkcsT0FBTyxFQUFFTCxzQkFBc0IsQ0FDaEMsRUFBRU0sT0FBTyxDQUFDUCxLQUFLLENBQUNRLFNBQVMsQ0FBQyxDQUFDO0VBQzFCLE9BQU8sQ0FBQyxRQUFRLENBQUMsT0FBTyxDQUFDLENBQUNILE1BQU0sQ0FBQyxDQUFDLE9BQU8sQ0FBQyxDQUFDQyxPQUFPLENBQUMsQ0FBQyxVQUFVLENBQUMsUUFBUSxHQUFHO0FBQzVFIiwiaWdub3JlTGlzdCI6W119
+
+export async function call(onDone: LocalJSXCommandOnDone, context: LocalJSXCommandContext): Promise<React.ReactNode> {
+  return <GodModeStatus onDone={onDone} />;
+}

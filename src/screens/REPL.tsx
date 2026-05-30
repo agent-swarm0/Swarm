@@ -23,7 +23,11 @@ import { CostThresholdDialog } from '../components/CostThresholdDialog.js';
 import { IdleReturnDialog } from '../components/IdleReturnDialog.js';
 import * as React from 'react';
 import { useEffect, useMemo, useRef, useState, useCallback, useDeferredValue, useLayoutEffect, type RefObject } from 'react';
-import { useNotifications } from '../context/notifications.js';
+import { useTuiOrchestrator } from '../hooks/useTuiOrchestrator.js';
+import TuiStatusBar from '../components/TuiStatusBar.tsx';
+import TuiPhaseBar from '../components/TuiPhaseBar.tsx';
+import TuiAsciiGraph from '../components/TuiAsciiGraph.tsx';
+
 import { sendNotification } from '../services/notifier.js';
 import { startPreventSleep, stopPreventSleep } from '../services/preventSleep.js';
 import { useTerminalNotification } from '../ink/useTerminalNotification.js';
@@ -702,6 +706,9 @@ export function REPL({
   }, [setDynamicMcpConfig]);
   const [screen, setScreen] = useState<Screen>('prompt');
   const [showAllInTranscript, setShowAllInTranscript] = useState(false);
+  const [showGraph, setShowGraph] = useState(false);
+  const { agents: tuiAgents, phase: tuiPhase, orchestrator: tuiOrch, sendCommand: tuiSendCommand } = useTuiOrchestrator("ws://localhost:3000/ws/orchestrator");
+
   // [ forces the dump-to-scrollback path inside transcript mode. Separate
   // from CLAUDE_CODE_NO_FLICKER=0 (which is process-lifetime) — this is
   // ephemeral, reset on transcript exit. Diagnostic escape hatch so
@@ -4603,7 +4610,13 @@ export function REPL({
                 {toolJSX?.isLocalJSXCommand && toolJSX.isImmediate && !toolJsxCentered && <Box flexDirection="column" width="100%">
                       {toolJSX.jsx}
                     </Box>}
+                {/* God Mode TUI Components */}
+                <TuiPhaseBar currentPhase={tuiPhase} />
+                <TuiStatusBar agents={tuiAgents} />
+                {showGraph && <TuiAsciiGraph agents={tuiAgents} />}
+                
                 {!showSpinner && !toolJSX?.isLocalJSXCommand && showExpandedTodos && tasksV2 && tasksV2.length > 0 && <Box width="100%" flexDirection="column">
+
                       <TaskListV2 tasks={tasksV2} isStandalone={true} />
                     </Box>}
                 {focusedInputDialog === 'sandbox-permission' && <SandboxPermissionRequest key={sandboxPermissionRequestQueue[0]!.hostPattern.host} hostPattern={sandboxPermissionRequestQueue[0]!.hostPattern} onUserResponse={(response: {
