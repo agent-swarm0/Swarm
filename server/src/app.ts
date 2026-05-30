@@ -9,6 +9,7 @@ import cors from "cors";
 import { config } from "./config.js";
 import { requestIdMiddleware } from "./middleware/requestId.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
+import { apiRateLimiter } from "./middleware/rateLimit.js";
 import { apiRouter } from "./routes/index.js";
 
 export function createApp(): Express {
@@ -26,6 +27,9 @@ export function createApp(): Express {
   );
   app.use(express.json({ limit: "1mb" }));
   app.use(requestIdMiddleware);
+
+  // Throttle the API surface; /health is mounted outside /api and stays open.
+  app.use("/api", apiRateLimiter);
 
   app.use(apiRouter);
 

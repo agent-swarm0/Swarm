@@ -46,6 +46,15 @@ export interface AppConfig {
   readonly logLevel: LogLevel;
   readonly nodeEnv: "development" | "production" | "test";
   readonly isProduction: boolean;
+  readonly rateLimit: {
+    readonly windowMs: number;
+    readonly max: number;
+  };
+}
+
+function parsePositiveInt(value: string | undefined, fallback: number): number {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
 }
 
 export const config: AppConfig = (() => {
@@ -62,5 +71,9 @@ export const config: AppConfig = (() => {
     logLevel: parseLogLevel(process.env.LOG_LEVEL),
     nodeEnv,
     isProduction: nodeEnv === "production",
+    rateLimit: {
+      windowMs: parsePositiveInt(process.env.RATE_LIMIT_WINDOW_MS, 60_000),
+      max: parsePositiveInt(process.env.RATE_LIMIT_MAX, 120),
+    },
   };
 })();
