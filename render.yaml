@@ -1,0 +1,23 @@
+# Render blueprint for the SWARM backend (Express + WS).
+# Deploys from the repo root so swarm.config.json + agents/ are present; build
+# and start run inside server/. Create via Render → New → Blueprint.
+services:
+  - type: web
+    name: swarm-server
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      # The app resolves swarm.config.json relative to its own file location
+      # (repo root), so SWARM_CONFIG_PATH is not needed here.
+      # Set to your deployed dashboard origin (comma-separated for multiple).
+      - key: CORS_ORIGINS
+        value: https://your-dashboard.vercel.app
+      # Provider keys are sent per-request by the dashboard; leave unset here.

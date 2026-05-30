@@ -15,8 +15,9 @@ import { apiRouter } from "./routes/index.js";
 export function createApp(): Express {
   const app = express();
 
-  // Trust the platform proxy (Railway/Render) for correct client IPs.
-  app.set("trust proxy", true);
+  // Trust a specific number of proxy hops (Railway/Render = 1) for correct
+  // client IPs. A count, not `true`, so IP rate limiting can't be spoofed.
+  app.set("trust proxy", config.trustProxyHops);
   app.disable("x-powered-by");
 
   app.use(

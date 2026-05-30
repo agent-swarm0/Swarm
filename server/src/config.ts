@@ -50,6 +50,12 @@ export interface AppConfig {
     readonly windowMs: number;
     readonly max: number;
   };
+  /**
+   * Number of proxy hops to trust for client IP. Deploy platforms (Railway /
+   * Render) put exactly one proxy in front, so the default is 1. A specific
+   * count (not `true`) is required so IP rate limiting can't be spoofed.
+   */
+  readonly trustProxyHops: number;
 }
 
 function parsePositiveInt(value: string | undefined, fallback: number): number {
@@ -75,5 +81,6 @@ export const config: AppConfig = (() => {
       windowMs: parsePositiveInt(process.env.RATE_LIMIT_WINDOW_MS, 60_000),
       max: parsePositiveInt(process.env.RATE_LIMIT_MAX, 120),
     },
+    trustProxyHops: parsePositiveInt(process.env.TRUST_PROXY_HOPS, 1),
   };
 })();
