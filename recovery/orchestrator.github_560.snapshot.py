@@ -487,6 +487,8 @@ Examples:
     
     parser.add_argument("goal", nargs="?", help="Goal or task description")
     parser.add_argument("--engine", "-e", help="Engine to use (claude, gemini, codex, kilocode, etc.)")
+    parser.add_argument("--provider", help="Provider for API mode (openai, anthropic, gemini, groq)")
+    parser.add_argument("--api-key", help="API key for the specified provider")
     parser.add_argument("--agent", "-a", help="Dispatch to a specific agent only")
     parser.add_argument("--command", help="Custom command for generic engine")
     parser.add_argument("--system-flag", default="--prompt", help="System prompt flag for generic engine")
@@ -552,6 +554,31 @@ Examples:
         print(json.dumps(result, indent=2, default=str))
         return
     
+    # API Mode bypass
+    if args.provider and args.api_key:
+        import subprocess
+        cmd = [
+            "npx", "tsx", "src/api/cli.ts",
+            "--provider", args.provider,
+            "--api-key", args.api_key,
+        ]
+        if args.agent:
+            cmd.extend(["--agent", args.agent])
+        if args.goal:
+            cmd.append(args.goal)
+        else:
+            # If no goal provided in CLI, but API mode is on, we might want interactive mode
+            # but for now, we require a goal for API mode.
+            print("❌ Error: API mode requires a goal.")
+            sys.exit(1)
+        
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"❌ API router failed: {e}")
+            sys.exit(1)
+        return
+
     # Full orchestration
     if args.goal:
         report = orchestrate(args.goal, engine=args.engine, project_dir=args.project, interactive=args.interactive)

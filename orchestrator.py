@@ -65,7 +65,11 @@ def _exec_pyc(pyc: Path) -> None:
     tgt.setdefault("__file__", str(_pkg / "orchestrator.py"))
     tgt.setdefault("__package__", None)
     tgt["__cached__"] = str(pyc)
-    exec(code, tgt)  # noqa: S102
+    try:
+        exec(code, tgt)  # noqa: S102
+    except Exception as e:
+        sys.stderr.write(f"\nSwarm bytecode execution failed: {e}\n")
+        sys.exit(1)
 
 
 def _exec_snapshot() -> None:
@@ -82,9 +86,10 @@ def _exec_snapshot() -> None:
 
 def _pick_runner():
     """Return (runner_fn, needs_interactive_wrap) tuple."""
-    for pyc in _PYC_CANDIDATES:
-        if pyc.is_file() and _pyc_magic_ok(pyc):
-            return _exec_pyc, pyc, True   # .pyc: its main() may have old print_help
+    if sys.version_info >= (3, 13):
+        for pyc in _PYC_CANDIDATES:
+            if pyc.is_file() and _pyc_magic_ok(pyc):
+                return _exec_pyc, pyc, True   # .pyc: its main() may have old print_help
     if not _SNAPSHOT.is_file():
         sys.stderr.write(
             "\nSwarm cannot start: no compatible orchestrator found.\n"
@@ -119,11 +124,17 @@ def _run() -> None:
         _session_model       = {"name": None}
         _project_path_holder = {"path": str(_pkg)}
 
-        try:
-            from core.slash_commands import handle_slash_line  # noqa: PLC0415
-            _slash_available = True
-        except ImportError:
-            _slash_available = False
+        from core.slash_commands import handle_slash_line  # noqa: PLC0415
+        _slash_available = True
+
+        
+        def _run_company(goal):
+            sys.argv.append(goal)
+            try:
+                exec_fn(pyc_arg)
+            finally:
+                if sys.argv and sys.argv[-1] == goal:
+                    sys.argv.pop()
 
         def _handle_slash(raw: str):
             if not _slash_available:
@@ -140,11 +151,7 @@ def _run() -> None:
                 on_reload_config=lambda: None,
                 on_set_agent=lambda slug: None,
                 on_set_paths=lambda: None,
-                on_run_company=lambda goal: (
-                    sys.argv.append(goal),
-                    exec_fn(pyc_arg),
-                    (sys.argv.pop() if sys.argv and sys.argv[-1] == goal else None),
-                ),
+                on_run_company=_run_company,
             )
 
         while True:
