@@ -1,10 +1,9 @@
 /**
- * WebSocket server for /ws/stream.
+ * WebSocket server for /ws/stream and /ws/orchestrator.
  *
- * Attaches to the existing HTTP server so HTTP and WS share one port. A client
- * connects with `?requestId=...` to subscribe to a run's frames. On connect it
- * receives a versioned `welcome` frame; thereafter the run dispatcher publishes
- * token/agent_status/done/error frames into the room (later commit).
+ * Attaches to the existing HTTP server so HTTP and WS share one port. 
+ * - /ws/stream: Run event streaming with requestId subscription
+ * - /ws/orchestrator: Real-time orchestrator dashboard events
  *
  * A heartbeat ping detects and reaps dead connections.
  */
@@ -13,8 +12,10 @@ import { WebSocketServer, type WebSocket } from "ws";
 import { join, leave } from "./hub.js";
 import { frame } from "./protocol.js";
 import { logger } from "../utils/logger.js";
+import { handleOrchestratorConnection } from "./orchestrator.js";
 
 const STREAM_PATH = "/ws/stream";
+const ORCHESTRATOR_PATH = "/ws/orchestrator";
 const HEARTBEAT_MS = 30_000;
 
 interface TrackedSocket extends WebSocket {
@@ -34,43 +35,23 @@ export interface WebSocketHandle {
 }
 
 export function attachWebSocketServer(server: Server): WebSocketHandle {
-  const wss = new WebSocketServer({ server, path: STREAM_PATH });
+  const wss = new WebSocketServer({ noServer: true });
 
-  wss.on("connection", (socket: WebSocket, req) => {
-    const ws = socket as TrackedSocket;
-    ws.isAlive = true;
-    ws.requestId = parseRequestId(req.url);
+  // Route WebSocket connections based on path
+  server.on("upgrade", (req, socket, head) => {
+    const { pathname } = new URL(req.url ?? "/", `http://${req.headers.host}`);
 
-    ws.on("pong", () => {
-      ws.isAlive = true;
-    });
-
-    ws.on("close", () => {
-      if (ws.requestId) leave(ws.requestId, ws);
-    });
-
-    ws.on("error", (err) => {
-      logger.warn("ws connection error", {
-        requestId: ws.requestId,
-        err: err.message,
+    if (pathname === STREAM_PATH) {
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        handleStreamConnection(ws as TrackedSocket, req);
       });
-    });
-
-    // Welcome first, then subscribe — `join` replays buffered run history, so
-    // the client sees: welcome → any missed frames → live frames.
-    ws.send(
-      JSON.stringify(
-        frame({
-          type: "welcome",
-          requestId: ws.requestId,
-          serverTime: new Date().toISOString(),
-        }),
-      ),
-    );
-
-    if (ws.requestId) join(ws.requestId, ws);
-
-    logger.info("ws client connected", { requestId: ws.requestId });
+    } else if (pathname === ORCHESTRATOR_PATH) {
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        handleOrchestratorConnection(ws);
+      });
+    } else {
+      socket.destroy();
+    }
   });
 
   // Heartbeat: terminate sockets that did not answer the previous ping.
@@ -95,4 +76,40 @@ export function attachWebSocketServer(server: Server): WebSocketHandle {
         wss.close(() => resolve());
       }),
   };
+}
+
+function handleStreamConnection(ws: TrackedSocket, req: any): void {
+  ws.isAlive = true;
+  ws.requestId = parseRequestId(req.url);
+
+  ws.on("pong", () => {
+    ws.isAlive = true;
+  });
+
+  ws.on("close", () => {
+    if (ws.requestId) leave(ws.requestId, ws);
+  });
+
+  ws.on("error", (err) => {
+    logger.warn("ws connection error", {
+      requestId: ws.requestId,
+      err: err.message,
+    });
+  });
+
+  // Welcome first, then subscribe — `join` replays buffered run history, so
+  // the client sees: welcome → any missed frames → live frames.
+  ws.send(
+    JSON.stringify(
+      frame({
+        type: "welcome",
+        requestId: ws.requestId,
+        serverTime: new Date().toISOString(),
+      }),
+    ),
+  );
+
+  if (ws.requestId) join(ws.requestId, ws);
+
+  logger.info("ws client connected", { requestId: ws.requestId });
 }
