@@ -518,10 +518,28 @@ Examples:
     # List agents
     if args.list_agents:
         config = load_config()
+        agents = config.get("agents", {})
+        
+        # Group agents by category if possible
+        categories = {}
+        for slug, conf in agents.items():
+            cat = conf.get("category", "General")
+            if cat not in categories:
+                categories[cat] = []
+            categories[cat].append({
+                "slug": slug,
+                "name": conf.get("name", slug),
+                "description": conf.get("description", "No description")
+            })
+        
         print("\n🤖 Available Agents:\n")
-        for name, conf in config.get("agents", {}).items():
-            print(f"  {name:20} — {conf.get('description', 'No description')}")
-        print(f"\nTotal: {len(config.get('agents', {}))} agents")
+        for cat, members in categories.items():
+            print(f"--- {cat} ---")
+            for m in members:
+                print(f"  {m['slug']:20} — {m['name']} : {m['description']}")
+            print()
+            
+        print(f"Total: {len(agents)} agents")
         return
     
     # Register custom engine
