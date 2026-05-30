@@ -46,6 +46,21 @@ export interface AppConfig {
   readonly logLevel: LogLevel;
   readonly nodeEnv: "development" | "production" | "test";
   readonly isProduction: boolean;
+  readonly rateLimit: {
+    readonly windowMs: number;
+    readonly max: number;
+  };
+  /**
+   * Number of proxy hops to trust for client IP. Deploy platforms (Railway /
+   * Render) put exactly one proxy in front, so the default is 1. A specific
+   * count (not `true`) is required so IP rate limiting can't be spoofed.
+   */
+  readonly trustProxyHops: number;
+}
+
+function parsePositiveInt(value: string | undefined, fallback: number): number {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
 }
 
 export const config: AppConfig = (() => {
@@ -62,5 +77,10 @@ export const config: AppConfig = (() => {
     logLevel: parseLogLevel(process.env.LOG_LEVEL),
     nodeEnv,
     isProduction: nodeEnv === "production",
+    rateLimit: {
+      windowMs: parsePositiveInt(process.env.RATE_LIMIT_WINDOW_MS, 60_000),
+      max: parsePositiveInt(process.env.RATE_LIMIT_MAX, 120),
+    },
+    trustProxyHops: parsePositiveInt(process.env.TRUST_PROXY_HOPS, 1),
   };
 })();
